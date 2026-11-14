@@ -23,6 +23,8 @@
     .hidden{display:none!important}.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.bar button,.secondary{padding:9px 13px;background:#263654}.note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:16px auto 0;max-width:650px}
     .chat-search{border:1px solid #2a3c5e;background:#0c1527;border-radius:13px;padding:12px;margin:12px 0}.chat-search-row{display:flex;gap:8px}.chat-search-row input{flex:1;min-width:0;padding:11px}.chat-search-meta{font-size:12px;color:var(--muted);margin:8px 0}.chat-search-results{display:grid;gap:8px;max-height:340px;overflow:auto}.chat-result{border:1px solid #2a3c5e;background:#111d32;border-radius:10px;padding:10px}.chat-result-head{display:flex;justify-content:space-between;gap:8px;color:var(--accent2);font-size:11px;margin-bottom:6px}.chat-result-text{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;color:#dce6f8}.chat-empty{font-size:13px;color:var(--muted);padding:10px 2px}@media(max-width:430px){.chat-search-row{flex-direction:column}}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}.memory-tools{display:grid;grid-template-columns:1fr 155px;gap:8px;margin-top:12px}.memory-tools input,.memory-tools select{padding:11px;font-size:13px}.memory-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px}.memory-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.memory-tags span{font-size:11px;color:#c9c1ff;background:#282348;border:1px solid #51458e;padding:4px 8px;border-radius:20px}.memory-meta{font-size:11px;color:#7185a5;margin-top:8px}.empty-filter{padding:12px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:520px){.memory-tools{grid-template-columns:1fr}}
     .personality-card{border:1px solid #51458e;background:linear-gradient(145deg,#171f3b,#111a2e);border-radius:16px;padding:15px;margin:16px 0 22px}.personality-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.personality-grid label{margin-top:8px}.personality-grid select{padding:11px;font-size:13px}.personality-card h3{margin:0 0 5px}.personality-card .muted{margin:0 0 8px}.personality-save{width:100%;margin-top:12px}.personality-status{min-height:18px;margin-top:8px;color:var(--accent2);font-size:12px}@media(max-width:560px){.personality-grid{grid-template-columns:1fr}}
+
+    .daily-checkin{border:1px solid #2d6a69;background:linear-gradient(135deg,#122b35,#171f3b 70%);border-radius:18px;padding:16px;margin:16px 0 22px}.daily-checkin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.daily-checkin h3{margin:0 0 6px}.daily-checkin-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}.daily-stat{background:#0b1726;border:1px solid #284253;border-radius:12px;padding:11px}.daily-stat strong{display:block;font-size:23px;color:var(--accent2)}.daily-stat span{font-size:11px;color:var(--muted)}.daily-checkin button{width:100%;margin-top:4px}.daily-checkin-status{font-size:12px;color:var(--accent2);min-height:18px;margin-top:9px;line-height:1.5}
     .chat{height:min(430px,55vh);min-height:260px;padding:8px 3px 16px;scroll-behavior:smooth}.bubble-wrap{max-width:88%;display:flex;flex-direction:column;gap:5px}.bubble-wrap.bot-wrap{align-self:flex-start}.bubble-wrap.user-wrap{align-self:flex-end;align-items:flex-end}.bubble{max-width:100%;position:relative}.bubble-meta{font-size:10px;color:#8294b2;padding:0 5px}.bubble-tools{display:flex;gap:6px;justify-content:flex-start}.bubble-tools button{padding:5px 9px;font-size:10px;background:#263654;border:1px solid #344969}.chat-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}.chat-tools button{padding:8px 11px;font-size:12px;background:#202d4a;border:1px solid #344969}.compose{align-items:flex-end}.compose textarea{flex:1;min-width:0;min-height:48px;max-height:150px;resize:vertical;padding:12px 13px}.compose button{min-height:48px}.compose-help{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:7px}.typing-dots{display:inline-flex;gap:4px;margin-left:5px;vertical-align:middle}.typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--accent2);animation:typingPulse 1s infinite ease-in-out}.typing-dots span:nth-child(2){animation-delay:.15s}.typing-dots span:nth-child(3){animation-delay:.3s}@keyframes typingPulse{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}@media(max-width:520px){.bubble-wrap{max-width:94%}.chat-tools{gap:5px}.compose-help{font-size:10px}}
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
   </style>
@@ -59,6 +61,15 @@
           </div>
           <button type="button" class="personality-save" id="savePersonality">Save personality settings</button>
           <div class="personality-status" id="personalityStatus" role="status">Loading your preferences...</div>
+        </section>
+        <section class="daily-checkin" aria-labelledby="dailyCheckinHeading">
+          <div class="daily-checkin-head"><div><h3 id="dailyCheckinHeading">🌅 Daily Check-in</h3><p class="muted">በየቀኑ አንድ ጊዜ Check-in አድርግ፤ ቀጣይነትህን አሳድግ።</p></div><span class="tag">Daily habit</span></div>
+          <div class="daily-checkin-stats">
+            <div class="daily-stat"><strong id="dailyCheckinStreak">0</strong><span>🔥 Current streak</span></div>
+            <div class="daily-stat"><strong id="dailyCheckinTotal">0</strong><span>📅 Total check-ins</span></div>
+          </div>
+          <button type="button" id="dailyCheckinButton">Complete today's check-in</button>
+          <div class="daily-checkin-status" id="dailyCheckinStatus" role="status">Loading your check-in...</div>
         </section>
         <h2>🧠 My Private Memory</h2>
         <p class="muted">እዚህ የምታስቀምጠውን መረጃ ብቻ እናስታውሳለን። ማንኛውንም መረጃ ማስተካከል ወይም ማጥፋት ትችላለህ።</p>
@@ -130,6 +141,80 @@
         setPersonalityStatus('Saved! Your next AI reply will use these preferences.');
       }catch(err){setPersonalityStatus('Save failed: '+(err.message||'Unknown error'),true);}
       finally{button.disabled=false;}
+    });
+
+    function localDateKey(date=new Date()) {
+      const year=date.getFullYear(), month=String(date.getMonth()+1).padStart(2,'0'), day=String(date.getDate()).padStart(2,'0');
+      return year+'-'+month+'-'+day;
+    }
+    function dateKeyToLocalDate(key) {
+      const [year,month,day]=key.split('-').map(Number);
+      return new Date(year,month-1,day);
+    }
+    function setDailyCheckinStatus(message,error=false) {
+      $('dailyCheckinStatus').textContent=message;
+      $('dailyCheckinStatus').style.color=error?'#ff9b9b':'var(--accent2)';
+    }
+    async function loadDailyCheckin() {
+      if(!currentUser)return;
+      const button=$('dailyCheckinButton');
+      button.disabled=true;
+      setDailyCheckinStatus('Loading your check-in history...');
+      try {
+        const {data,error}=await supabase.from('ai_daily_checkins')
+          .select('checkin_date').eq('user_id',currentUser.id)
+          .order('checkin_date',{ascending:false});
+        if(error)throw error;
+        const rows=data||[], today=localDateKey();
+        const checkedToday=rows.some(row=>row.checkin_date===today);
+        $('dailyCheckinTotal').textContent=String(rows.length);
+        let streak=0;
+        if(rows.length) {
+          const latest=dateKeyToLocalDate(rows[0].checkin_date);
+          const todayDate=dateKeyToLocalDate(today);
+          const daysFromToday=Math.round((todayDate-latest)/86400000);
+          if(daysFromToday===0||daysFromToday===1) {
+            const dates=new Set(rows.map(row=>row.checkin_date));
+            let cursor=new Date(latest);
+            while(dates.has(localDateKey(cursor))) {
+              streak++;
+              cursor.setDate(cursor.getDate()-1);
+            }
+          }
+        }
+        $('dailyCheckinStreak').textContent=String(streak);
+        button.disabled=checkedToday;
+        button.textContent=checkedToday?'✓ Checked in today':'Complete today\'s check-in';
+        setDailyCheckinStatus(checkedToday?'Great job! You have completed today\'s check-in.':'Your next check-in is ready. Keep your streak going!');
+      } catch(err) {
+        button.disabled=true;
+        setDailyCheckinStatus('Could not load check-in: '+(err.message||'Unknown error'),true);
+      }
+    }
+    $('dailyCheckinButton').addEventListener('click',async()=>{
+      if(!currentUser)return;
+      const button=$('dailyCheckinButton');
+      button.disabled=true;
+      setDailyCheckinStatus('Saving today\'s check-in...');
+      try {
+        const {error}=await supabase.from('ai_daily_checkins').insert({
+          user_id:currentUser.id,
+          checkin_date:localDateKey()
+        });
+        if(error) {
+          if(error.code==='23505') {
+            setDailyCheckinStatus('You have already checked in today.');
+            await loadDailyCheckin();
+            return;
+          }
+          throw error;
+        }
+        setDailyCheckinStatus('🎉 Check-in complete! See you tomorrow.');
+        await loadDailyCheckin();
+      } catch(err) {
+        button.disabled=false;
+        setDailyCheckinStatus('Check-in failed: '+(err.message||'Unknown error'),true);
+      }
     });
 
     function setMode(next) {
