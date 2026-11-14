@@ -125,7 +125,8 @@
         if(editingId) result=await supabase.from('ai_memories').update(payload).eq('id',editingId).eq('user_id',currentUser.id);
         else result=await supabase.from('ai_memories').insert(payload);
         if(result.error) throw result.error;
-        resetMemoryForm(); showMessage('memoryMessage',editingId?'Memory updated.':'Memory saved.');
+        const wasEditing=Boolean(editingId);
+        resetMemoryForm(); showMessage('memoryMessage',wasEditing?'Memory updated.':'Memory saved.');
         await loadMemories();
       } catch(err) { showMessage('memoryMessage',err.message||'Could not save memory',true); }
       finally { $('memorySave').disabled=false; }
@@ -173,6 +174,7 @@
         }
         if(data?.error) throw new Error(data.error);
         waiting.textContent=data?.reply||'AI ምላሽ አልመጣም።';
+        if(data?.memory_saved>0) addBubble('🧠 '+data.memory_saved+' አዲስ Memory በራስ-ሰር ተቀምጧል።','bot');
       } catch(err) { waiting.textContent='ስህተት፦ '+(err.message||'AI connection failed'); }
       finally { send.disabled=false; input.focus(); $('chat').scrollTop=$('chat').scrollHeight; }
     });
