@@ -32,13 +32,58 @@
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
     .live-call{border:1px solid #51458e;background:linear-gradient(145deg,#171f3b,#0c1427);border-radius:20px;padding:16px;margin:18px 0 22px}.live-call h3{margin:0 0 6px}.call-stage{position:relative;min-height:300px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:flex-start;gap:24px;padding:20px 28px;background:radial-gradient(circle at 18% 40%,#51458e 0,#22264a 35%,#080d1b 78%);border:1px solid #51458e}.call-avatar{width:190px;height:230px;border-radius:100px 100px 30px 30px;background:linear-gradient(145deg,#3b4777,#17213c);background-size:cover;background-position:center;box-shadow:0 0 55px #887aff55;border:2px solid #b9aaff88;position:relative;overflow:hidden}.call-avatar:before{content:'';position:absolute;width:116px;height:140px;left:35px;top:20px;border-radius:48% 48% 42% 42%;background:linear-gradient(90deg,#241b31,#4a2c3c 55%,#211a30)}.call-avatar:after{content:'';position:absolute;width:86px;height:105px;left:50px;top:47px;border-radius:48%;background:linear-gradient(135deg,#ffd9c9,#d99d91);box-shadow:inset 0 -8px 0 #c9827f}.call-avatar.photo:before,.call-avatar.photo:after{display:none}.call-mouth{position:absolute;z-index:3;width:18px;height:5px;left:84px;top:126px;border-radius:0 0 12px 12px;background:#8f4654;transform-origin:center;transition:height .08s}.call-avatar.speaking .call-mouth{animation:lipMove .18s infinite alternate}.call-avatar.photo .call-mouth{display:none}@keyframes lipMove{from{height:3px;transform:scaleX(.8)}to{height:15px;transform:scaleX(1.15)}}.call-avatar.speaking{animation:callPulse 1.8s infinite ease-in-out}@keyframes callPulse{50%{transform:scale(1.025);box-shadow:0 0 75px #9b8cffaa}}.call-label{position:absolute;bottom:12px;left:14px;color:#fff;font-size:12px;background:#080d1bcc;padding:7px 10px;border-radius:20px}.call-status{font-size:12px;color:var(--accent2);min-height:20px;margin:10px 0}.call-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.call-controls button{min-width:105px}.call-controls .end-call{background:#9a3658}@media(max-width:600px){.call-stage{min-height:250px;justify-content:center;padding:16px}.call-avatar{width:150px;height:190px}.call-avatar:before{left:17px}.call-avatar:after{left:32px}.call-label{left:10px;bottom:10px}}
 
+
+    /* Refined responsive dashboard */
+    .wrap{max-width:1180px;padding:26px 22px 56px}
+    .top{padding:4px 2px}.brand{font-size:15px;letter-spacing:1.2px}
+    .hero{padding:42px 12px 30px}.hero .avatar{width:116px;height:116px}
+    .panel{max-width:100%;background:linear-gradient(145deg,rgba(17,28,48,.96),rgba(11,19,35,.96));border-color:#293a59;border-radius:24px}
+    .dashboard-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;margin:8px 0 18px;border:1px solid #2a3b5b;border-radius:18px;background:linear-gradient(110deg,#172442,#101a2d)}
+    .dashboard-heading .bar{margin:0;width:100%}
+    .dashboard-heading #welcome{font-size:16px}
+    .dashboard-layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:18px;align-items:start}
+    .dashboard-nav{position:sticky;top:14px;display:grid;gap:7px;padding:10px;border:1px solid #293a59;border-radius:20px;background:#0d1729}
+    .dashboard-nav button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:13px 14px;background:transparent;color:#aebbd1;border:1px solid transparent;border-radius:12px;font-weight:650}
+    .dashboard-nav button:hover{background:#182640;color:#fff}
+    .dashboard-nav button.active{background:linear-gradient(120deg,#51458e,#344b76);border-color:#7869c8;color:#fff;box-shadow:0 8px 22px #080d1b66}
+    .dashboard-content{min-width:0}
+    .dashboard-view{animation:viewIn .22s ease both;min-width:0}
+    .dashboard-view[hidden]{display:none!important}
+    @keyframes viewIn{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .view-heading{margin:2px 0 16px}.view-heading h2{font-size:23px;margin:0 0 5px}.view-heading p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+    .view-stack{display:grid;gap:16px;min-width:0}
+    .view-card{min-width:0;padding:18px;border:1px solid #293a59;border-radius:20px;background:linear-gradient(145deg,#111e33,#0d1729);box-shadow:0 14px 35px #0002}
+    .view-card>h2:first-child{margin-top:0}
+    .view-card .live-call,.view-card .privacy-card,.view-card .avatar-studio,.view-card .personality-card,.view-card .daily-checkin{margin:0}
+    .view-card .panel{padding:0;border:0;background:transparent;box-shadow:none}
+    .view-card .chat{height:min(460px,58vh)}
+    .view-card .memory-tools{margin-top:14px}
+    .view-card .memory-head{gap:12px}
+    .live-call{padding:18px}
+    .call-stage{min-height:320px}
+    input,textarea,select{transition:border-color .18s,box-shadow .18s}
+    input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px #9b8cff20}
+    button{transition:transform .16s,filter .16s,box-shadow .16s}
+    button:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
+    .message,.call-status,.privacy-status,.avatar-studio-status,.personality-status{overflow-wrap:anywhere}
+    @media(max-width:760px){
+      .wrap{padding:16px 12px 36px}.dashboard-layout{grid-template-columns:1fr;gap:12px}
+      .dashboard-nav{position:sticky;top:0;z-index:20;display:flex;overflow-x:auto;gap:6px;padding:7px;border-radius:15px;scrollbar-width:none;backdrop-filter:blur(16px);background:#0b1425ed}
+      .dashboard-nav::-webkit-scrollbar{display:none}
+      .dashboard-nav button{flex:0 0 auto;width:auto;white-space:nowrap;padding:11px 13px;font-size:12px}
+      .dashboard-heading{padding:11px 13px;margin:6px 0 12px}
+      .view-heading h2{font-size:20px}.view-card{padding:13px;border-radius:17px}
+      .call-stage{min-height:245px}.panel{padding:14px}
+    }
+    @media(max-width:420px){.dashboard-nav button{padding:10px 11px}.dashboard-heading #welcome{font-size:13px}.dashboard-heading #logout{padding:9px 11px}}
+
     .live-avatar-picker{display:grid;grid-template-columns:1fr 110px;gap:12px;align-items:center;margin:14px 0;padding:12px;background:#0b1426;border:1px solid #344568;border-radius:14px}.live-avatar-picker select{padding:10px;font-size:13px}.live-avatar-preview{width:104px;height:116px;object-fit:cover;border-radius:12px;background:#17213c;border:1px solid #51458e}.live-avatar-picker button{margin-top:8px;padding:9px 12px}.live-avatar-meta{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}.live-avatar-state{font-size:12px;color:var(--accent2);min-height:18px;margin-top:7px}@media(max-width:430px){.live-avatar-picker{grid-template-columns:1fr 86px}.live-avatar-preview{width:82px;height:100px}}
   </style>
 </head>
 <body>
   <main class="wrap">
     <header class="top"><div class="brand">✦ MY AI PARTNER</div><div class="status" id="status">● SECURE SIGN IN</div></header>
-    <section class="hero">
+    <section class="hero" id="heroSection">
       <div class="avatar" id="heroAvatar" aria-label="AI Partner avatar" role="img"></div>
       <h1>Your AI Partner</h1>
       <p class="sub">የግል የAI ቦታህ፤ ለመወያየት፣ ለመማር እና ግቦችህን ለማሳካት።</p>
@@ -124,8 +169,8 @@
           <div class="call-controls"><button type="button" id="startCall">Start Call</button><button type="button" class="secondary" id="callMic" disabled>🎙️ Speak</button><button type="button" class="end-call" id="endCall" disabled>End Call</button></div>
           <p class="muted" style="margin-top:10px">Microphone permission ሲጠየቅ ፍቀድ። Camera access አንጠይቅም። Voice recognition በBrowser ድጋፍ ላይ ይመረኮዛል።</p>
         </section>
-        <h2>🧠 My Private Memory</h2>
-        <p class="muted">እዚህ የምታስቀምጠውን መረጃ ብቻ እናስታውሳለን። ማንኛውንም መረጃ ማስተካከል ወይም ማጥፋት ትችላለህ።</p>
+        <h2 id="memoryHeading">🧠 My Private Memory</h2>
+        <p class="muted" id="memoryIntro">እዚህ የምታስቀምጠውን መረጃ ብቻ እናስታውሳለን። ማንኛውንም መረጃ ማስተካከል ወይም ማጥፋት ትችላለህ።</p>
         <form id="memoryForm">
           <label for="memoryTitle">Title</label><input id="memoryTitle" maxlength="120" placeholder="ለምሳሌ፦ የእኔ ግብ" required>
           <label for="memoryCategory">Category</label>
@@ -504,13 +549,116 @@
       $('authSubmit').textContent=login?'Login securely':'Create account';
       $('password').autocomplete=login?'current-password':'new-password'; showMessage('authMessage','');
     }
+
+    function setupDashboardLayout() {
+      if ($('dashboardLayout')) return;
+      const app = $('appPanel');
+      const source = app.querySelector(':scope > .panel');
+      const panels = app.querySelectorAll(':scope > .panel');
+      const chatPanel = panels[1];
+      if (!source || !chatPanel) return;
+
+      const heading = document.createElement('div');
+      heading.className = 'dashboard-heading';
+      const welcomeBar = source.querySelector('.bar');
+      heading.append(welcomeBar);
+
+      const layout = document.createElement('div');
+      layout.className = 'dashboard-layout';
+      layout.id = 'dashboardLayout';
+      const nav = document.createElement('nav');
+      nav.className = 'dashboard-nav';
+      nav.setAttribute('aria-label', 'Dashboard sections');
+      const content = document.createElement('div');
+      content.className = 'dashboard-content';
+
+      const definitions = [
+        {id:'overview', label:'⌂  Overview', title:'Your space', subtitle:'Daily check-in and private conversations.'},
+        {id:'call', label:'♡  Live AI Call', title:'Live AI Partner', subtitle:'Talk with your AI companion using your microphone. Your camera stays off.'},
+        {id:'memory', label:'▣  My Memory', title:'Private Memory', subtitle:'Manage what your AI Partner can remember about you.'},
+        {id:'settings', label:'⚙  Settings', title:'Personal settings', subtitle:'Customize your avatar, personality and account privacy.'}
+      ];
+      const views = {};
+      definitions.forEach((item, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = item.label;
+        button.dataset.view = item.id;
+        button.classList.toggle('active', index === 0);
+        button.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
+        nav.append(button);
+
+        const view = document.createElement('section');
+        view.className = 'dashboard-view';
+        view.id = 'view-' + item.id;
+        view.hidden = index !== 0;
+        const viewHeading = document.createElement('div');
+        viewHeading.className = 'view-heading';
+        const title = document.createElement('h2');
+        title.textContent = item.title;
+        const subtitle = document.createElement('p');
+        subtitle.textContent = item.subtitle;
+        viewHeading.append(title, subtitle);
+        const stack = document.createElement('div');
+        stack.className = 'view-stack';
+        view.append(viewHeading, stack);
+        content.append(view);
+        views[item.id] = {view, stack};
+      });
+
+      function addCard(viewId, nodes, className='view-card') {
+        const card = document.createElement('div');
+        card.className = className;
+        nodes.filter(Boolean).forEach(node => card.append(node));
+        views[viewId].stack.append(card);
+      }
+
+      const daily = source.querySelector('.daily-checkin');
+      const call = source.querySelector('.live-call');
+      const privacy = source.querySelector('.privacy-card');
+      const avatar = source.querySelector('.avatar-studio');
+      const personality = source.querySelector('.personality-card');
+      const memoryTitle = source.querySelector('#memoryHeading');
+      const memoryIntro = source.querySelector('#memoryIntro');
+      const memoryForm = source.querySelector('#memoryForm');
+      const memoryMessage = source.querySelector('#memoryMessage');
+      const memoryExportBar = source.querySelector('#exportMemories')?.closest('.bar');
+      const memoryTools = source.querySelector('.memory-tools');
+      const memoryStats = source.querySelector('.memory-stats');
+      const memoryList = source.querySelector('#memoryList');
+
+      addCard('overview', [daily]);
+      addCard('overview', [chatPanel], 'view-card chat-card');
+      addCard('call', [call]);
+      addCard('memory', [memoryTitle, memoryIntro, memoryForm, memoryMessage, memoryExportBar, memoryTools, memoryStats, memoryList]);
+      addCard('settings', [avatar, personality, privacy]);
+
+      source.remove();
+      layout.append(nav, content);
+      app.append(heading, layout);
+
+      nav.addEventListener('click', event => {
+        const button = event.target.closest('button[data-view]');
+        if (!button) return;
+        const next = button.dataset.view;
+        Object.entries(views).forEach(([id, item]) => {
+          const active = id === next;
+          item.view.hidden = !active;
+          const tab = nav.querySelector('[data-view="' + id + '"]');
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      });
+    }
+
     function showApp(user) {
-      currentUser=user; $('authPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden');
+      setupDashboardLayout();
+      currentUser=user; $('authPanel').classList.add('hidden'); $('heroSection').classList.add('hidden'); $('appPanel').classList.remove('hidden');
       $('status').textContent='● SIGNED IN'; $('welcome').textContent='Hello 💜 '+(user.email||'');
       loadAvatar(); syncCallAvatar(); loadLiveAvatars(); loadPersonalitySettings(); loadDailyCheckin(); loadMemories(); loadChatHistory();
     }
     function showAuth() {
-      currentUser=null; $('appPanel').classList.add('hidden'); $('authPanel').classList.remove('hidden');
+      currentUser=null; $('appPanel').classList.add('hidden'); $('heroSection').classList.remove('hidden'); $('authPanel').classList.remove('hidden');
       $('status').textContent='● SECURE SIGN IN'; $('memoryList').replaceChildren();
     }
     $('loginTab').addEventListener('click',()=>setMode('login'));
