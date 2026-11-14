@@ -62,10 +62,10 @@
         <div id="memoryList"><p class="muted">Memories loading...</p></div>
       </section>
       <section class="panel">
-        <h2>💬 Chat</h2>
+        <div class="bar"><h2>💬 Chat History</h2><button type="button" class="secondary" id="clearChat">Clear history</button></div>
         <div class="chat" id="chat" aria-live="polite"><div class="bubble bot">ሰላም 💜 እኔ የግል AI Partner ነኝ። የምታስቀምጣቸውን Memory እጠቀማለሁ። እንዴት ልርዳህ?</div></div>
         <form class="compose" id="chatForm"><input id="message" type="text" placeholder="መልዕክት ጻፍ..." autocomplete="off" aria-label="Write a message"><button type="submit">Send</button></form>
-        <p class="note">AI ምላሽ ለማግኘት ኢንተርኔት ያስፈልጋል። የChat መልዕክቶች በDatabase አይቀመጡም።</p>
+        <p class="note">የቀድሞ ውይይቶችህ በግል መለያህ ይቀመጣሉ፤ AI ለቀጣይ ውይይት የቅርብ መልዕክቶችን ይጠቀማል።</p>
       </section>
     </section>
   </main>
@@ -88,7 +88,7 @@
     function showApp(user) {
       currentUser=user; $('authPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden');
       $('status').textContent='● SIGNED IN'; $('welcome').textContent='Hello 💜 '+(user.email||'');
-      loadMemories();
+      loadMemories(); loadChatHistory();
     }
     function showAuth() {
       currentUser=null; $('appPanel').classList.add('hidden'); $('authPanel').classList.remove('hidden');
@@ -158,6 +158,23 @@
       const bubble=document.createElement('div'); bubble.className='bubble '+(role==='user'?'user':'bot');
       bubble.textContent=text; $('chat').append(bubble); $('chat').scrollTop=$('chat').scrollHeight; return bubble;
     }
+    async function loadChatHistory() {
+      if(!currentUser) return;
+      const {data,error}=await supabase.from('ai_chat_messages')
+        .select('role,content,created_at').eq('user_id',currentUser.id)
+        .order('created_at',{ascending:false}).limit(40);
+      if(error) { addBubble('የቀድሞ ውይይት መጫን አልተቻለም። '+error.message); return; }
+      $('chat').replaceChildren();
+      if(!data.length) addBubble('ሰላም 💜 እኔ የግል AI Partner ነኝ። እንዴት ልርዳህ?','bot');
+      else data.reverse().forEach(item=>addBubble(item.content,item.role));
+      $('chat').scrollTop=$('chat').scrollHeight;
+    }
+    $('clearChat').addEventListener('click',async()=>{
+      if(!currentUser || !confirm('ሁሉንም የChat ታሪክ ማጥፋት ትፈልጋለህ?')) return;
+      const {error}=await supabase.from('ai_chat_messages').delete().eq('user_id',currentUser.id);
+      if(error) addBubble('ታሪኩን ማጥፋት አልተቻለም። '+error.message);
+      else await loadChatHistory();
+    });
     $('chatForm').addEventListener('submit',async e=>{
       e.preventDefault(); const input=$('message'), value=input.value.trim(); if(!value||!currentUser)return;
       addBubble(value,'user'); input.value='';
