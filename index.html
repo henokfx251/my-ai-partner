@@ -26,6 +26,7 @@
 
     .avatar.has-photo{background-size:cover;background-position:center;background-repeat:no-repeat}.avatar.has-photo:before,.avatar.has-photo:after{display:none}
     .avatar-studio{border:1px solid #51458e;background:linear-gradient(145deg,#171f3b,#111a2e);border-radius:18px;padding:16px;margin:16px 0 22px}.avatar-studio h3{margin:0 0 6px}.avatar-studio-grid{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center}.avatar-mini{width:104px;height:104px;border-radius:50%;border:2px solid #a99cff88;background:linear-gradient(145deg,#3b4777,#17213c);background-size:cover;background-position:center;box-shadow:0 0 28px #887aff30}.avatar-studio input[type=file]{padding:10px;font-size:12px}.avatar-studio-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.avatar-studio-actions button{flex:1;min-width:120px}.avatar-studio-status{font-size:12px;min-height:18px;margin-top:9px;color:var(--accent2)}@media(max-width:430px){.avatar-studio-grid{grid-template-columns:1fr;justify-items:center}.avatar-studio-grid>div{width:100%}}
+    .privacy-card{border:1px solid #31536b;background:linear-gradient(145deg,#122637,#111a2e);border-radius:18px;padding:16px;margin:16px 0 22px}.privacy-card h3{margin:0 0 6px}.privacy-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.privacy-action{background:#0b1726;border:1px solid #2a4059;border-radius:13px;padding:12px}.privacy-action button{width:100%;margin-top:9px}.privacy-action p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.5}.privacy-danger{border-color:#75465b}.privacy-danger button{background:#713c54}.privacy-status{min-height:18px;font-size:12px;color:var(--accent2);margin-top:10px}@media(max-width:520px){.privacy-grid{grid-template-columns:1fr}}
     .daily-checkin{border:1px solid #2d6a69;background:linear-gradient(135deg,#122b35,#171f3b 70%);border-radius:18px;padding:16px;margin:16px 0 22px}.daily-checkin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.daily-checkin h3{margin:0 0 6px}.daily-checkin-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}.daily-stat{background:#0b1726;border:1px solid #284253;border-radius:12px;padding:11px}.daily-stat strong{display:block;font-size:23px;color:var(--accent2)}.daily-stat span{font-size:11px;color:var(--muted)}.daily-checkin button{width:100%;margin-top:4px}.daily-checkin-status{font-size:12px;color:var(--accent2);min-height:18px;margin-top:9px;line-height:1.5}
     .chat{height:min(430px,55vh);min-height:260px;padding:8px 3px 16px;scroll-behavior:smooth}.bubble-wrap{max-width:88%;display:flex;flex-direction:column;gap:5px}.bubble-wrap.bot-wrap{align-self:flex-start}.bubble-wrap.user-wrap{align-self:flex-end;align-items:flex-end}.bubble{max-width:100%;position:relative}.bubble-meta{font-size:10px;color:#8294b2;padding:0 5px}.bubble-tools{display:flex;gap:6px;justify-content:flex-start}.bubble-tools button{padding:5px 9px;font-size:10px;background:#263654;border:1px solid #344969}.chat-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}.chat-tools button{padding:8px 11px;font-size:12px;background:#202d4a;border:1px solid #344969}.compose{align-items:flex-end}.compose textarea{flex:1;min-width:0;min-height:48px;max-height:150px;resize:vertical;padding:12px 13px}.compose button{min-height:48px}.compose-help{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:7px}.typing-dots{display:inline-flex;gap:4px;margin-left:5px;vertical-align:middle}.typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--accent2);animation:typingPulse 1s infinite ease-in-out}.typing-dots span:nth-child(2){animation-delay:.15s}.typing-dots span:nth-child(3){animation-delay:.3s}@keyframes typingPulse{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}@media(max-width:520px){.bubble-wrap{max-width:94%}.chat-tools{gap:5px}.compose-help{font-size:10px}}
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
@@ -53,6 +54,20 @@
     <section class="hidden" id="appPanel">
       <section class="panel">
         <div class="bar"><strong id="welcome">Hello 💜</strong><button type="button" id="logout">Logout</button></div>
+        <section class="privacy-card" aria-labelledby="privacyHeading">
+          <h3 id="privacyHeading">🔐 Privacy & Security</h3>
+          <p class="muted">የመለያህን ደህንነት እና የግል ዳታህን ከዚህ ተቆጣጠር።</p>
+          <div class="privacy-grid">
+            <div class="privacy-action"><strong>Change password</strong><p>አዲስ Password አዘጋጅ። ቢያንስ 8 ቁምፊ ይሁን።</p>
+              <label for="newPassword">New password</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+              <label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat new password">
+              <button type="button" id="updatePassword">Update password</button></div>
+            <div class="privacy-action"><strong>Export my data</strong><p>Memories፣ Chat፣ Check-ins እና Settings በJSON ፋይል አውርድ።</p><button type="button" id="exportPersonalData">Export personal data</button></div>
+            <div class="privacy-action"><strong>Sign out everywhere</strong><p>ከዚህ መለያ ጋር የተያያዙ ንቁ Sessions ለማቋረጥ ይሞክራል።</p><button type="button" class="secondary" id="globalSignOut">Sign out all sessions</button></div>
+            <div class="privacy-action privacy-danger"><strong>Delete chat & memories</strong><p>የChat ታሪክህን እና የተቀመጡ Memories ብቻ ያጠፋል። መለያህን አያጠፋም።</p><button type="button" id="deletePersonalContent">Delete chat & memories</button></div>
+          </div>
+          <div class="privacy-status" id="privacyStatus" role="status">Your data is protected by account-based access policies.</div>
+        </section>
         <section class="avatar-studio" aria-labelledby="avatarStudioHeading">
           <h3 id="avatarStudioHeading">👩 AI Avatar Studio</h3>
           <p class="muted">Realistic Avatar አዘጋጅ። ከስልክህ ፎቶ ምረጥ፣ ስም ስጥና በዚህ Browser ላይ አስቀምጥ።</p>
@@ -128,6 +143,61 @@
     let mode = 'login', editingId = null, currentUser = null, allMemories = [], searchableChatRows = null;
 
     function showMessage(id, message, error=false) { $(id).textContent=message; $(id).style.color=error?'#ff9b9b':'var(--accent2)'; }
+    function setPrivacyStatus(message,error=false){$('privacyStatus').textContent=message;$('privacyStatus').style.color=error?'#ff9b9b':'var(--accent2)';}
+    async function fetchOwnedRows(table,columns){
+      const {data,error}=await supabase.from(table).select(columns).eq('user_id',currentUser.id);
+      if(error)throw error;return data||[];
+    }
+    $('updatePassword').addEventListener('click',async()=>{
+      if(!currentUser)return;
+      const password=$('newPassword').value,confirmation=$('confirmPassword').value;
+      if(password.length<8){setPrivacyStatus('Password must be at least 8 characters.',true);return;}
+      if(password!==confirmation){setPrivacyStatus('Passwords do not match.',true);return;}
+      const button=$('updatePassword');button.disabled=true;setPrivacyStatus('Updating password...');
+      try{const {error}=await supabase.auth.updateUser({password});if(error)throw error;$('newPassword').value='';$('confirmPassword').value='';setPrivacyStatus('Password updated successfully.');}
+      catch(err){setPrivacyStatus('Password update failed: '+(err.message||'Unknown error'),true);}
+      finally{button.disabled=false;}
+    });
+    $('exportPersonalData').addEventListener('click',async()=>{
+      if(!currentUser)return;
+      const button=$('exportPersonalData');button.disabled=true;setPrivacyStatus('Preparing your personal data export...');
+      try{
+        const [memories,chats,personality,checkins]=await Promise.all([
+          fetchOwnedRows('ai_memories','id,title,category,content,tags,created_at,updated_at'),
+          fetchOwnedRows('ai_chat_messages','id,role,content,created_at'),
+          fetchOwnedRows('ai_personality_settings','personality,language,response_length,updated_at'),
+          fetchOwnedRows('ai_daily_checkins','checkin_date,created_at')
+        ]);
+        const payload={exported_at:new Date().toISOString(),account_email:currentUser.email,memories,chat_messages:chats,personality_settings:personality,daily_checkins:checkins};
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='my-ai-partner-private-data.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        setPrivacyStatus('Your personal data export is ready.');
+      }catch(err){setPrivacyStatus('Export failed: '+(err.message||'Unknown error'),true);}
+      finally{button.disabled=false;}
+    });
+    $('globalSignOut').addEventListener('click',async()=>{
+      if(!confirm('Are you sure you want to sign out all active sessions?'))return;
+      const button=$('globalSignOut');button.disabled=true;setPrivacyStatus('Signing out all sessions...');
+      try{const {error}=await supabase.auth.signOut({scope:'global'});if(error)throw error;setPrivacyStatus('Global sign-out request completed.');}
+      catch(err){setPrivacyStatus('Could not sign out all sessions: '+(err.message||'Unknown error'),true);}
+      finally{button.disabled=false;}
+    });
+    $('deletePersonalContent').addEventListener('click',async()=>{
+      if(!currentUser)return;
+      if(!confirm('This permanently deletes all your saved chat messages and memories. Continue?'))return;
+      if(!confirm('Final confirmation: delete ALL chat history and ALL memories for this account?'))return;
+      const button=$('deletePersonalContent');button.disabled=true;setPrivacyStatus('Deleting your chat and memories...');
+      try{
+        const [chatDelete,memoryDelete]=await Promise.all([
+          supabase.from('ai_chat_messages').delete().eq('user_id',currentUser.id),
+          supabase.from('ai_memories').delete().eq('user_id',currentUser.id)
+        ]);
+        if(chatDelete.error)throw chatDelete.error;if(memoryDelete.error)throw memoryDelete.error;
+        searchableChatRows=null;allMemories=[];renderMemories();$('chat').replaceChildren();addBubble('Your chat history and saved memories are now empty.','bot');
+        setPrivacyStatus('Chat history and saved memories deleted.');
+      }catch(err){setPrivacyStatus('Delete failed: '+(err.message||'Unknown error'),true);}
+      finally{button.disabled=false;}
+    });
+
     let pendingAvatarData = '';
     function avatarStorageKey(){return currentUser?'my-ai-partner-avatar-'+currentUser.id:null;}
     function applyAvatar(data,name){
