@@ -418,15 +418,47 @@
     $('loadLiveAvatars').addEventListener('click',loadLiveAvatars);
     $('liveAvatarSelect').addEventListener('change',updateLiveAvatarPreview);
 
-    let callActive=false, recognition=null, callBusy=false;
+    let callActive=false, mediaRecorder=null, callStream=null, recordedChunks=[], callBusy=false;
     function setCallStatus(message,error=false){$('callStatus').textContent=message;$('callStatus').style.color=error?'#ff9b9b':'var(--accent2)';}
     function syncCallAvatar(){const el=$('callAvatar');if(!el)return;if(!currentUser)return;try{const saved=localStorage.getItem(avatarStorageKey());if(saved){const parsed=JSON.parse(saved);if(parsed.image){el.style.backgroundImage='url('+JSON.stringify(parsed.image)+')';el.classList.add('photo');$('callAvatarName').textContent=parsed.name||'Your AI Partner';return;}}}catch(_){}el.style.backgroundImage='';el.classList.remove('photo');$('callAvatarName').textContent=$('avatarName')?.value||'Your AI Partner';}
     function speakCallReply(text){if(!('speechSynthesis' in window)){setCallStatus('ይህ Browser የVoice output አይደግፍም።');return;}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);const lang=$('personalityLanguage')?.value||'auto';utterance.lang=lang==='am'?'am-ET':lang==='en'?'en-US':(/^[\u1200-\u137F]/.test(text)?'am-ET':'en-US');utterance.rate=.96;utterance.pitch=1.08;utterance.onstart=()=>$('callAvatar').classList.add('speaking');utterance.onend=()=>$('callAvatar').classList.remove('speaking');utterance.onerror=()=> $('callAvatar').classList.remove('speaking');window.speechSynthesis.speak(utterance);}
-    async function sendCallToAI(text){if(!currentUser||callBusy)return;callBusy=true;$('callMic').disabled=true;setCallStatus('AI Partner እያሰበች ነው...');try{const {data,error}=await supabase.functions.invoke('ai-chat',{body:{message:text}});if(error)throw error;if(data?.error)throw new Error(data.error);const reply=data?.reply||'ይቅርታ፣ ምላሽ ማግኘት አልቻልኩም።';addBubble(text,'user');addBubble(reply,'bot');setCallStatus('AI Partner እየመለሰች ነው...');speakCallReply(reply);}catch(err){setCallStatus('AI connection error: '+(err.message||'Try again.'),true);}finally{callBusy=false;$('callMic').disabled=!callActive||!recognition;}}
-    function setupCallRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setCallStatus('ይህ Browser የVoice recognition አይደግፍም። Chrome ላይ ሞክር።',true);return null;}const rec=new SR();rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;rec.lang=$('personalityLanguage')?.value==='en'?'en-US':'am-ET';rec.onstart=()=>setCallStatus('እየሰማሁህ ነው... ተናገር።');rec.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript?.trim();if(t)sendCallToAI(t);else setCallStatus('ድምፅ አልተለየም።',true);};rec.onerror=e=>setCallStatus('Microphone error: '+(e.error||'unknown'),true);rec.onend=()=>{if(callActive&&!callBusy)$('callMic').disabled=false;};return rec;}
-    $('startCall').addEventListener('click',()=>{if(!currentUser)return;callActive=true;syncCallAvatar();recognition=setupCallRecognition();$('startCall').disabled=true;$('endCall').disabled=false;$('callMic').disabled=!recognition;if(recognition)setCallStatus('ጥሪው ተጀምሯል። Speak ተጫንና ተናገር።');});
-    $('callMic').addEventListener('click',()=>{if(!callActive||!recognition||callBusy)return;try{$('callMic').disabled=true;recognition.start();}catch(err){$('callMic').disabled=false;setCallStatus('Microphone መክፈት አልተቻለም። '+err.message,true);}});
-    $('endCall').addEventListener('click',()=>{callActive=false;try{recognition?.stop();}catch(_){}recognition=null;if('speechSynthesis' in window)window.speechSynthesis.cancel();$('callAvatar').classList.remove('speaking');$('startCall').disabled=false;$('callMic').disabled=true;$('endCall').disabled=true;setCallStatus('ጥሪው ተጠናቋል።');});
+    async function sendCallToAI(text){if(!currentUser||callBusy)return;callBusy=true;$('callMic').disabled=true;setCallStatus('AI Partner እያሰበች ነው...');try{const {data,error}=await supabase.functions.invoke('ai-chat',{body:{message:text}});if(error)throw error;if(data?.error)throw new Error(data.error);const reply=data?.reply||'ይቅርታ፣ ምላሽ ማግኘት አልቻልኩም።';addBubble(text,'user');addBubble(reply,'bot');setCallStatus('AI Partner እየመለሰች ነው...');speakCallReply(reply);}catch(err){setCallStatus('AI connection error: '+(err.message||'Try again.'),true);}finally{callBusy=false;$('callMic').disabled=!callActive;$('callMic').textContent='🎙️ Start speaking';}}
+    async function transcribeCallAudio(blob){
+      if(!blob||!blob.size){setCallStatus('ድምፅ አልተቀረጸም። እንደገና ሞክር።',true);return;}
+      setCallStatus('ድምፅህን ወደ ጽሑፍ እየቀየርኩ ነው...');
+      try{
+        const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Audio file could not be read.'));reader.readAsDataURL(blob);});
+        const {data,error}=await supabase.functions.invoke('ai-transcribe',{body:{audio:dataUrl,mimeType:blob.type||'audio/webm'}});
+        if(error)throw error;if(data?.error)throw new Error(data.error);
+        const transcript=(data?.text||'').trim();
+        if(!transcript)throw new Error('ድምፅህን መለየት አልቻልኩም።');
+        setCallStatus('የተሰማው፦ '+transcript);
+        await sendCallToAI(transcript);
+      }catch(err){setCallStatus('Voice error: '+(err.message||'Please try again.'),true);}
+    }
+    async function startVoiceRecording(){
+      if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){setCallStatus('ይህ Browser የAudio recording አይደግፍም። Chrome ውስጥ ክፈት።',true);return;}
+      try{
+        callStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
+        const mime=['audio/webm;codecs=opus','audio/mp4','audio/webm'].find(type=>MediaRecorder.isTypeSupported(type));
+        mediaRecorder=mime?new MediaRecorder(callStream,{mimeType:mime}):new MediaRecorder(callStream);
+        recordedChunks=[];
+        mediaRecorder.ondataavailable=e=>{if(e.data?.size)recordedChunks.push(e.data);};
+        mediaRecorder.onerror=()=>setCallStatus('የድምፅ ቀረጻ ላይ ችግር ተፈጥሯል።',true);
+        mediaRecorder.onstop=async()=>{
+          const blob=new Blob(recordedChunks,{type:mediaRecorder?.mimeType||'audio/webm'});
+          callStream?.getTracks().forEach(track=>track.stop());callStream=null;mediaRecorder=null;
+          $('callMic').textContent='🎙️ Start speaking';
+          if(callActive)await transcribeCallAudio(blob);
+        };
+        mediaRecorder.start();
+        $('callMic').textContent='⏹ Stop & Send';
+        setCallStatus('እየቀረጽኩ ነው... ተናገር፤ ሲጨርስ Stop & Send ተጫን።');
+      }catch(err){callStream?.getTracks().forEach(track=>track.stop());callStream=null;setCallStatus('Microphone መክፈት አልተቻለም። Browser permission ፍቀድ። '+(err.message||''),true);}
+    }
+    $('startCall').addEventListener('click',()=>{if(!currentUser)return;callActive=true;syncCallAvatar();$('startCall').disabled=true;$('endCall').disabled=false;$('callMic').disabled=false;setCallStatus('ጥሪው ተጀምሯል። Start speaking ተጫንና ተናገር።');});
+    $('callMic').addEventListener('click',()=>{if(!callActive||callBusy)return;if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('callMic').disabled=true;setCallStatus('ድምፅህን እያዘጋጀሁ ነው...');}else{startVoiceRecording();}});
+    $('endCall').addEventListener('click',()=>{callActive=false;if(mediaRecorder?.state==='recording'){mediaRecorder.onstop=null;mediaRecorder.stop();}callStream?.getTracks().forEach(track=>track.stop());callStream=null;mediaRecorder=null;if('speechSynthesis' in window)window.speechSynthesis.cancel();$('callAvatar').classList.remove('speaking');$('startCall').disabled=false;$('callMic').disabled=true;$('callMic').textContent='🎙️ Start speaking';$('endCall').disabled=true;setCallStatus('ጥሪው ተጠናቋል።');});
     function setMode(next) {
       mode=next; const login=mode==='login';
       $('loginTab').classList.toggle('active',login); $('signupTab').classList.toggle('active',!login);
