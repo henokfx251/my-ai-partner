@@ -63,9 +63,9 @@
       </section>
       <section class="panel">
         <h2>💬 Chat</h2>
-        <div class="chat" id="chat" aria-live="polite"><div class="bubble bot">ሰላም 💜 እንኳን ወደ የግል AI Partner ቦታህ በደህና መጣህ። የግል Memory አሁን ተዘጋጅቷል። የAI አገልግሎት ግን ገና አልተገናኘም።</div></div>
+        <div class="chat" id="chat" aria-live="polite"><div class="bubble bot">ሰላም 💜 እኔ የግል AI Partner ነኝ። የምታስቀምጣቸውን Memory እጠቀማለሁ። እንዴት ልርዳህ?</div></div>
         <form class="compose" id="chatForm"><input id="message" type="text" placeholder="መልዕክት ጻፍ..." autocomplete="off" aria-label="Write a message"><button type="submit">Send</button></form>
-        <p class="note">ይህ የChat ገጽታ ብቻ ነው፤ መልዕክቶች አሁን ወደ AI አይላኩም ወይም አይቀመጡም።</p>
+        <p class="note">AI ምላሽ ለማግኘት ኢንተርኔት ያስፈልጋል። የChat መልዕክቶች በDatabase አይቀመጡም።</p>
       </section>
     </section>
   </main>
@@ -153,9 +153,28 @@
       }
     }
     $('refreshMemories').addEventListener('click',loadMemories);
-    $('chatForm').addEventListener('submit',e=>{
-      e.preventDefault(); const input=$('message'),value=input.value.trim(); if(!value)return;
-      const bubble=document.createElement('div');bubble.className='bubble user';bubble.textContent=value;$('chat').append(bubble);input.value='';$('chat').scrollTop=$('chat').scrollHeight;
+    function addBubble(text, role='bot') {
+      const bubble=document.createElement('div'); bubble.className='bubble '+(role==='user'?'user':'bot');
+      bubble.textContent=text; $('chat').append(bubble); $('chat').scrollTop=$('chat').scrollHeight; return bubble;
+    }
+    $('chatForm').addEventListener('submit',async e=>{
+      e.preventDefault(); const input=$('message'), value=input.value.trim(); if(!value||!currentUser)return;
+      addBubble(value,'user'); input.value='';
+      const send=$('chatForm').querySelector('button'); send.disabled=true;
+      const waiting=addBubble('እያሰብኩ ነው...'); 
+      try {
+        const {data:{session},error:sessionError}=await supabase.auth.getSession();
+        if(sessionError||!session?.access_token) throw new Error('እባክህ እንደገና Login አድርግ።');
+        const {data,error}=await supabase.functions.invoke('ai-chat',{body:{message:value}});
+        if(error) {
+          let detail=error.message||'AI request failed.';
+          try { const ctx=error.context; if(ctx?.json) { const j=await ctx.json(); detail=j.error||detail; } } catch(_){}
+          throw new Error(detail);
+        }
+        if(data?.error) throw new Error(data.error);
+        waiting.textContent=data?.reply||'AI ምላሽ አልመጣም።';
+      } catch(err) { waiting.textContent='ስህተት፦ '+(err.message||'AI connection failed'); }
+      finally { send.disabled=false; input.focus(); $('chat').scrollTop=$('chat').scrollHeight; }
     });
     const {data:{session}}=await supabase.auth.getSession(); if(session?.user) showApp(session.user);
   </script>
