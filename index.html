@@ -21,7 +21,7 @@
     .chat{height:230px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 16px}.bubble{max-width:85%;padding:12px 15px;border-radius:16px;line-height:1.5;font-size:14px;overflow-wrap:anywhere;white-space:pre-wrap}.bot{background:#1a2944;border:1px solid #2a3c5e;align-self:flex-start}.user{background:#51458e;align-self:flex-end}
     .compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:15px}.compose input{min-width:0;flex:1}.compose button{white-space:nowrap}
     .hidden{display:none!important}.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.bar button,.secondary{padding:9px 13px;background:#263654}.note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:16px auto 0;max-width:650px}
-    .memory-item{border:1px solid #2a3c5e;background:#0c1527;border-radius:14px;padding:13px;margin-top:10px}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}
+    .memory-item{border:1px solid #2a3c5e;background:#0c1527;border-radius:14px;padding:13px;margin-top:10px}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}.memory-tools{display:grid;grid-template-columns:1fr 155px;gap:8px;margin-top:12px}.memory-tools input,.memory-tools select{padding:11px;font-size:13px}.memory-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px}.memory-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.memory-tags span{font-size:11px;color:#c9c1ff;background:#282348;border:1px solid #51458e;padding:4px 8px;border-radius:20px}.memory-meta{font-size:11px;color:#7185a5;margin-top:8px}.empty-filter{padding:12px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:520px){.memory-tools{grid-template-columns:1fr}}
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -53,12 +53,15 @@
           <label for="memoryTitle">Title</label><input id="memoryTitle" maxlength="120" placeholder="ለምሳሌ፦ የእኔ ግብ" required>
           <label for="memoryCategory">Category</label>
           <select id="memoryCategory"><option value="general">General</option><option value="goals">Goals</option><option value="trading">Trading</option><option value="work">Work / Project</option><option value="preferences">Preferences</option><option value="personal">Personal notes</option></select>
-          <label for="memoryContent">Memory details</label><textarea id="memoryContent" maxlength="5000" placeholder="ማስታወስ የምትፈልገውን ጻፍ..." required></textarea>
+          <label for="memoryContent">Memory details</label><textarea id="memoryContent" maxlength="5000" placeholder="ማስታወስ የምትፈልገውን ጻፍ..." required></textarea><p class="muted" id="memoryCharCount">0 / 5000 characters · AI recall uses up to 350 characters per memory.</p>
+          <label for="memoryTags">Tags (comma separated)</label><input id="memoryTags" maxlength="300" placeholder="ለምሳሌ፦ goals, important, trading">
           <button class="primary" id="memorySave" type="submit">Save memory</button>
           <button class="secondary hidden" id="cancelEdit" type="button" style="margin-top:8px;width:100%">Cancel edit</button>
         </form>
         <p class="message" id="memoryMessage" role="status"></p>
-        <div class="bar" style="margin-top:20px"><strong>Saved memories</strong><button type="button" class="secondary" id="refreshMemories">Refresh</button></div>
+        <div class="bar" style="margin-top:20px"><strong>Saved memories</strong><div style="display:flex;gap:7px"><button type="button" class="secondary" id="exportMemories">Export</button><button type="button" class="secondary" id="refreshMemories">Refresh</button></div></div>
+        <div class="memory-tools"><input id="memorySearch" type="search" placeholder="Search title, details or tags..."><select id="memoryFilter" aria-label="Filter by category"><option value="all">All categories</option><option value="general">General</option><option value="goals">Goals</option><option value="trading">Trading</option><option value="work">Work / Project</option><option value="preferences">Preferences</option><option value="personal">Personal notes</option></select></div>
+        <div class="memory-stats"><span class="muted" id="memoryStats">Loading saved memories...</span><span class="muted">Private to your account</span></div>
         <div id="memoryList"><p class="muted">Memories loading...</p></div>
       </section>
       <section class="panel">
@@ -75,7 +78,7 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ELbQNkYz1Ao4iSV0TW5IGQ_9JckylmF';
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
-    let mode = 'login', editingId = null, currentUser = null;
+    let mode = 'login', editingId = null, currentUser = null, allMemories = [];
 
     function showMessage(id, message, error=false) { $(id).textContent=message; $(id).style.color=error?'#ff9b9b':'var(--accent2)'; }
     function setMode(next) {
@@ -112,12 +115,13 @@
 
     function resetMemoryForm() {
       editingId=null; $('memoryForm').reset(); $('memorySave').textContent='Save memory';
-      $('cancelEdit').classList.add('hidden'); showMessage('memoryMessage','');
+      $('cancelEdit').classList.add('hidden'); $('memoryCharCount').textContent='0 / 5000 characters · AI recall uses up to 350 characters per memory.'; showMessage('memoryMessage','');
     }
+    $('memoryContent').addEventListener('input',()=>{$('memoryCharCount').textContent=$('memoryContent').value.length+' / 5000 characters · AI recall uses up to 350 characters per memory.';});
     $('cancelEdit').addEventListener('click',resetMemoryForm);
     $('memoryForm').addEventListener('submit',async e=>{
       e.preventDefault(); if(!currentUser) return;
-      const payload={user_id:currentUser.id,title:$('memoryTitle').value.trim(),category:$('memoryCategory').value,content:$('memoryContent').value.trim(),updated_at:new Date().toISOString()};
+      const payload={user_id:currentUser.id,title:$('memoryTitle').value.trim(),category:$('memoryCategory').value,content:$('memoryContent').value.trim(),tags:[...new Set($('memoryTags').value.split(',').map(t=>t.trim()).filter(Boolean))].slice(0,12),updated_at:new Date().toISOString()};
       if(!payload.title||!payload.content) return;
       $('memorySave').disabled=true;
       try {
@@ -134,25 +138,44 @@
     async function loadMemories() {
       if(!currentUser) return;
       $('memoryList').textContent='Loading...';
-      const {data,error}=await supabase.from('ai_memories').select('id,title,category,content,created_at,updated_at').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+      const {data,error}=await supabase.from('ai_memories').select('id,title,category,content,tags,created_at,updated_at').eq('user_id',currentUser.id).order('updated_at',{ascending:false});
       if(error) { $('memoryList').textContent='Memory load error: '+error.message; return; }
+      allMemories=data||[]; renderMemories();
+    }
+    function renderMemories() {
+      const query=$('memorySearch').value.trim().toLocaleLowerCase();
+      const categoryFilter=$('memoryFilter').value;
+      const filtered=allMemories.filter(item=>{
+        const categoryOk=categoryFilter==='all'||item.category===categoryFilter;
+        const searchable=[item.title,item.content,item.category,...(item.tags||[])].join(' ').toLocaleLowerCase();
+        return categoryOk&&(!query||searchable.includes(query));
+      });
+      $('memoryStats').textContent=filtered.length+' shown · '+allMemories.length+' saved';
       $('memoryList').replaceChildren();
-      if(!data.length) { const p=document.createElement('p'); p.className='muted'; p.textContent='ገና Memory የለም። ከላይ አንድ መረጃ አስቀምጥ።'; $('memoryList').append(p); return; }
-      for(const item of data) {
+      if(!filtered.length) { const p=document.createElement('p'); p.className='empty-filter'; p.textContent=allMemories.length?'No memories match your search.':'ገና Memory የለም። ከላይ አንድ መረጃ አስቀምጥ።'; $('memoryList').append(p); return; }
+      for(const item of filtered) {
         const card=document.createElement('article'); card.className='memory-item';
         const head=document.createElement('div'); head.className='memory-head';
         const title=document.createElement('strong'); title.textContent=item.title;
-        const category=document.createElement('span'); category.className='tag'; category.textContent=item.category;
+        const category=document.createElement('span'); category.className='tag'; category.textContent=item.category||'general';
         head.append(title,category);
         const body=document.createElement('p'); body.className='muted'; body.textContent=item.content;
+        card.append(head,body);
+        if(item.tags?.length){const tags=document.createElement('div');tags.className='memory-tags';item.tags.forEach(value=>{const chip=document.createElement('span');chip.textContent='#'+value;tags.append(chip);});card.append(tags);}
+        const meta=document.createElement('div');meta.className='memory-meta';meta.textContent='Updated: '+(item.updated_at?new Date(item.updated_at).toLocaleString():'—');card.append(meta);
         const actions=document.createElement('div'); actions.className='memory-actions';
         const edit=document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='Edit';
-        edit.addEventListener('click',()=>{editingId=item.id;$('memoryTitle').value=item.title;$('memoryCategory').value=item.category;$('memoryContent').value=item.content;$('memorySave').textContent='Update memory';$('cancelEdit').classList.remove('hidden');$('memoryTitle').focus();});
+        edit.addEventListener('click',()=>{editingId=item.id;$('memoryTitle').value=item.title;$('memoryCategory').value=item.category||'general';$('memoryContent').value=item.content;$('memoryTags').value=(item.tags||[]).join(', ');$('memoryCharCount').textContent=item.content.length+' / 5000 characters · AI recall uses up to 350 characters per memory.';$('memorySave').textContent='Update memory';$('cancelEdit').classList.remove('hidden');$('memoryTitle').focus();window.scrollTo({top:0,behavior:'smooth'});});
         const del=document.createElement('button'); del.type='button'; del.className='danger'; del.textContent='Delete';
         del.addEventListener('click',async()=>{if(!confirm('ይህን Memory ማጥፋት ትፈልጋለህ?')) return; const {error}=await supabase.from('ai_memories').delete().eq('id',item.id).eq('user_id',currentUser.id); if(error) showMessage('memoryMessage',error.message,true); else {showMessage('memoryMessage','Memory deleted.'); if(editingId===item.id) resetMemoryForm(); await loadMemories();}});
-        actions.append(edit,del); card.append(head,body,actions); $('memoryList').append(card);
+        actions.append(edit,del);card.append(actions);$('memoryList').append(card);
       }
     }
+    $('memorySearch').addEventListener('input',renderMemories);
+    $('memoryFilter').addEventListener('change',renderMemories);
+    $('exportMemories').addEventListener('click',()=>{
+      const blob=new Blob([JSON.stringify(allMemories,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='my-ai-partner-memories.json';a.click();URL.revokeObjectURL(url);
+    });
     $('refreshMemories').addEventListener('click',loadMemories);
     function addBubble(text, role='bot') {
       const bubble=document.createElement('div'); bubble.className='bubble '+(role==='user'?'user':'bot');
