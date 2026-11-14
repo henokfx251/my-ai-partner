@@ -32,6 +32,7 @@
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
     .live-call{border:1px solid #51458e;background:linear-gradient(145deg,#171f3b,#0c1427);border-radius:20px;padding:16px;margin:18px 0 22px}.live-call h3{margin:0 0 6px}.call-stage{position:relative;min-height:300px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#51458e 0,#22264a 35%,#080d1b 78%);border:1px solid #51458e}.call-avatar{width:190px;height:230px;border-radius:100px 100px 30px 30px;background:linear-gradient(145deg,#3b4777,#17213c);background-size:cover;background-position:center;box-shadow:0 0 55px #887aff55;border:2px solid #b9aaff88;position:relative;overflow:hidden}.call-avatar:before{content:'';position:absolute;width:116px;height:140px;left:35px;top:20px;border-radius:48% 48% 42% 42%;background:linear-gradient(90deg,#241b31,#4a2c3c 55%,#211a30)}.call-avatar:after{content:'';position:absolute;width:86px;height:105px;left:50px;top:47px;border-radius:48%;background:linear-gradient(135deg,#ffd9c9,#d99d91);box-shadow:inset 0 -8px 0 #c9827f}.call-avatar.photo:before,.call-avatar.photo:after{display:none}.call-mouth{position:absolute;z-index:3;width:18px;height:5px;left:84px;top:126px;border-radius:0 0 12px 12px;background:#8f4654;transform-origin:center;transition:height .08s}.call-avatar.speaking .call-mouth{animation:lipMove .18s infinite alternate}.call-avatar.photo .call-mouth{display:none}@keyframes lipMove{from{height:3px;transform:scaleX(.8)}to{height:15px;transform:scaleX(1.15)}}.call-avatar.speaking{animation:callPulse 1.8s infinite ease-in-out}@keyframes callPulse{50%{transform:scale(1.025);box-shadow:0 0 75px #9b8cffaa}}.call-label{position:absolute;bottom:12px;left:14px;color:#fff;font-size:12px;background:#080d1bcc;padding:7px 10px;border-radius:20px}.call-status{font-size:12px;color:var(--accent2);min-height:20px;margin:10px 0}.call-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.call-controls button{min-width:105px}.call-controls .end-call{background:#9a3658}@media(max-width:430px){.call-stage{min-height:260px}.call-avatar{width:160px;height:200px}.call-avatar:before{left:22px}.call-avatar:after{left:37px}}
 
+    .live-avatar-picker{display:grid;grid-template-columns:1fr 110px;gap:12px;align-items:center;margin:14px 0;padding:12px;background:#0b1426;border:1px solid #344568;border-radius:14px}.live-avatar-picker select{padding:10px;font-size:13px}.live-avatar-preview{width:104px;height:116px;object-fit:cover;border-radius:12px;background:#17213c;border:1px solid #51458e}.live-avatar-picker button{margin-top:8px;padding:9px 12px}.live-avatar-meta{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}.live-avatar-state{font-size:12px;color:var(--accent2);min-height:18px;margin-top:7px}@media(max-width:430px){.live-avatar-picker{grid-template-columns:1fr 86px}.live-avatar-preview{width:82px;height:100px}}
   </style>
 </head>
 <body>
@@ -108,6 +109,16 @@
           <h3 id="liveCallHeading">📹 Live AI Call</h3>
           <p class="muted">ከAI Partner ጋር በድምፅ ተወያይ። የአንተ ካሜራ አይከፈትም።</p>
           <div class="call-stage"><div class="call-avatar" id="callAvatar" role="img" aria-label="AI Partner avatar"><span class="call-mouth" aria-hidden="true"></span></div><span class="call-label" id="callAvatarName">Your AI Partner</span></div>
+          <div class="live-avatar-picker">
+            <div>
+              <label for="liveAvatarSelect">LiveAvatar character</label>
+              <select id="liveAvatarSelect"><option value="">Load your LiveAvatar characters...</option></select>
+              <button type="button" class="secondary" id="loadLiveAvatars">↻ Load / Refresh Avatars</button>
+              <div class="live-avatar-meta">Choose an ACTIVE avatar from your LiveAvatar account. Your camera stays off.</div>
+              <div class="live-avatar-state" id="liveAvatarState" role="status">Loading avatar selector...</div>
+            </div>
+            <img class="live-avatar-preview" id="liveAvatarPreview" alt="Selected LiveAvatar preview" hidden>
+          </div>
           <div class="call-status" id="callStatus" role="status">ጥሪ ለመጀመር Start Call ተጫን።</div>
           <div class="call-controls"><button type="button" id="startCall">Start Call</button><button type="button" class="secondary" id="callMic" disabled>🎙️ Speak</button><button type="button" class="end-call" id="endCall" disabled>End Call</button></div>
           <p class="muted" style="margin-top:10px">Microphone permission ሲጠየቅ ፍቀድ። Camera access አንጠይቅም። Voice recognition በBrowser ድጋፍ ላይ ይመረኮዛል።</p>
@@ -366,6 +377,47 @@
       }
     });
 
+    let liveAvatarChoices = [];
+    async function loadLiveAvatars(){
+      const button=$('loadLiveAvatars'),select=$('liveAvatarSelect'),state=$('liveAvatarState'),preview=$('liveAvatarPreview');
+      if(!currentUser||!button||!select)return;
+      button.disabled=true;state.textContent='Loading avatars from LiveAvatar...';
+      try{
+        const {data,error}=await supabase.functions.invoke('liveavatar-avatars',{body:{}});
+        if(error)throw error;
+        if(data?.error)throw new Error(data.error);
+        liveAvatarChoices=Array.isArray(data?.avatars)?data.avatars:[];
+        select.replaceChildren();
+        const usable=liveAvatarChoices.filter(a=>a.status==='ACTIVE'&&!a.is_expired);
+        if(!usable.length){
+          select.add(new Option('No active avatar found',''));
+          preview.hidden=true;
+          state.textContent=liveAvatarChoices.length?'Your avatars are not ACTIVE yet. Wait until processing finishes.':'No avatar found. Create one in your LiveAvatar dashboard first.';
+          return;
+        }
+        usable.forEach(a=>select.add(new Option(a.name+' · '+a.status,a.id)));
+        select.value=usable[0].id;
+        updateLiveAvatarPreview();
+        state.textContent=usable.length+' active avatar(s) loaded. Select the character you want to use.';
+      }catch(err){
+        select.replaceChildren(new Option('Could not load avatars',''));
+        preview.hidden=true;
+        state.textContent='Avatar loading failed: '+(err.message||'Please try again.');
+        state.style.color='#ff9b9b';
+      }finally{button.disabled=false;}
+    }
+    function updateLiveAvatarPreview(){
+      const id=$('liveAvatarSelect')?.value;
+      const avatar=liveAvatarChoices.find(a=>a.id===id);
+      const preview=$('liveAvatarPreview'),state=$('liveAvatarState');
+      if(!avatar){preview.hidden=true;return;}
+      if(avatar.preview_url){preview.src=avatar.preview_url;preview.hidden=false;}else{preview.removeAttribute('src');preview.hidden=true;}
+      state.style.color='var(--accent2)';
+      state.textContent='Selected: '+avatar.name+'. Next: connect the LITE video stream and voice agent.';
+    }
+    $('loadLiveAvatars').addEventListener('click',loadLiveAvatars);
+    $('liveAvatarSelect').addEventListener('change',updateLiveAvatarPreview);
+
     let callActive=false, recognition=null, callBusy=false;
     function setCallStatus(message,error=false){$('callStatus').textContent=message;$('callStatus').style.color=error?'#ff9b9b':'var(--accent2)';}
     function syncCallAvatar(){const el=$('callAvatar');if(!el)return;if(!currentUser)return;try{const saved=localStorage.getItem(avatarStorageKey());if(saved){const parsed=JSON.parse(saved);if(parsed.data){el.style.backgroundImage='url('+JSON.stringify(parsed.data)+')';el.classList.add('photo');$('callAvatarName').textContent=parsed.name||'Your AI Partner';return;}}}catch(_){}el.style.backgroundImage='';el.classList.remove('photo');$('callAvatarName').textContent=$('avatarName')?.value||'Your AI Partner';}
@@ -385,7 +437,7 @@
     function showApp(user) {
       currentUser=user; $('authPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden');
       $('status').textContent='● SIGNED IN'; $('welcome').textContent='Hello 💜 '+(user.email||'');
-      loadAvatar(); syncCallAvatar(); loadPersonalitySettings(); loadDailyCheckin(); loadMemories(); loadChatHistory();
+      loadAvatar(); syncCallAvatar(); loadLiveAvatars(); loadPersonalitySettings(); loadDailyCheckin(); loadMemories(); loadChatHistory();
     }
     function showAuth() {
       currentUser=null; $('appPanel').classList.add('hidden'); $('authPanel').classList.remove('hidden');
