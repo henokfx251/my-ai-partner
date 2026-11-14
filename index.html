@@ -191,6 +191,7 @@
         }
         if(data?.error) throw new Error(data.error);
         waiting.textContent=data?.reply||'AI ምላሽ አልመጣም።';
+        if(data?.history_saved===false) addBubble('⚠️ ይህ ውይይት በታሪክ ውስጥ አልተቀመጠም። እባክህ እንደገና ሞክር።','bot');
         if(data?.memory_saved>0) addBubble('🧠 '+data.memory_saved+' አዲስ Memory በራስ-ሰር ተቀምጧል።','bot');
       } catch(err) { waiting.textContent='ስህተት፦ '+(err.message||'AI connection failed'); }
       finally { send.disabled=false; input.focus(); $('chat').scrollTop=$('chat').scrollHeight; }
