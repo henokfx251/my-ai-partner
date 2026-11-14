@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="am">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,51 +9,157 @@
     :root{color-scheme:dark;--bg:#080d1b;--panel:#101a2d;--line:#22314b;--text:#edf3ff;--muted:#91a2bd;--accent:#9b8cff;--accent2:#54d6c8}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#182342 0,var(--bg) 48%);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}
     .wrap{max-width:980px;margin:auto;padding:24px 18px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:750;letter-spacing:.3px}.status{font-size:12px;color:var(--accent2);border:1px solid #245b59;padding:7px 10px;border-radius:20px}
-    .hero{text-align:center;padding:44px 12px 26px}.avatar{width:142px;height:142px;margin:0 auto 22px;border-radius:50%;position:relative;background:radial-gradient(circle at 50% 42%,#ffe0d4 0 24%,transparent 25%),radial-gradient(ellipse at 50% 83%,#9b8cff 0 35%,transparent 36%),linear-gradient(145deg,#3b4777,#17213c);box-shadow:0 0 55px #887aff45;border:2px solid #a99cff55;overflow:hidden}
-    .avatar:before{content:"";position:absolute;width:76px;height:94px;left:31px;top:17px;border-radius:48% 48% 42% 42%;background:linear-gradient(90deg,#241b31,#4a2c3c 55%,#211a30);z-index:0}
-    .avatar:after{content:"";position:absolute;width:56px;height:69px;left:42px;top:34px;border-radius:48%;background:linear-gradient(135deg,#ffd9c9,#d99d91);box-shadow:inset 0 -8px 0 #c9827f}
-    h1{font-size:clamp(30px,6vw,48px);margin:0 0 10px;letter-spacing:-1.2px}.sub{color:var(--muted);max-width:580px;margin:auto;line-height:1.6}
-    .panel{background:#101a2ddd;border:1px solid var(--line);border-radius:22px;padding:20px;max-width:720px;margin:24px auto;box-shadow:0 18px 60px #0003}
-    .chat{height:190px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 16px}.bubble{max-width:85%;padding:12px 15px;border-radius:16px;line-height:1.5;font-size:14px}.bot{background:#1a2944;border:1px solid #2a3c5e;align-self:flex-start}.user{background:#51458e;align-self:flex-end}
-    .compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:15px}.compose input{min-width:0;flex:1;background:#0a1222;border:1px solid #2a3b59;border-radius:13px;padding:14px;color:var(--text);font-size:15px;outline:none}.compose input:focus{border-color:var(--accent)}
-    button{border:0;border-radius:13px;padding:0 18px;background:linear-gradient(135deg,var(--accent),#7565db);color:white;font-weight:700;font-size:14px}
-    .note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:18px auto 0;max-width:650px}
-    @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:36px}.panel{padding:14px}.compose button{padding:0 14px}}
+    .hero{text-align:center;padding:35px 12px 22px}.avatar{width:132px;height:132px;margin:0 auto 18px;border-radius:50%;position:relative;background:radial-gradient(circle at 50% 42%,#ffe0d4 0 24%,transparent 25%),radial-gradient(ellipse at 50% 83%,#9b8cff 0 35%,transparent 36%),linear-gradient(145deg,#3b4777,#17213c);box-shadow:0 0 55px #887aff45;border:2px solid #a99cff55;overflow:hidden}
+    .avatar:before{content:"";position:absolute;width:76px;height:94px;left:27px;top:12px;border-radius:48% 48% 42% 42%;background:linear-gradient(90deg,#241b31,#4a2c3c 55%,#211a30)}
+    .avatar:after{content:"";position:absolute;width:56px;height:69px;left:38px;top:29px;border-radius:48%;background:linear-gradient(135deg,#ffd9c9,#d99d91);box-shadow:inset 0 -8px 0 #c9827f}
+    h1{font-size:clamp(28px,6vw,44px);margin:0 0 10px;letter-spacing:-1.2px}.sub{color:var(--muted);max-width:580px;margin:auto;line-height:1.6}
+    .panel{background:#101a2ddd;border:1px solid var(--line);border-radius:22px;padding:20px;max-width:720px;margin:20px auto;box-shadow:0 18px 60px #0003}
+    .auth{max-width:440px}.tabs{display:flex;gap:8px;margin-bottom:16px}.tabs button{flex:1;background:#1a2944;color:var(--muted);padding:12px}.tabs button.active{background:#51458e;color:white}
+    label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}input{width:100%;background:#0a1222;border:1px solid #2a3b59;border-radius:13px;padding:14px;color:var(--text);font-size:15px;outline:none}input:focus{border-color:var(--accent)}
+    button{border:0;border-radius:13px;padding:13px 18px;background:linear-gradient(135deg,var(--accent),#7565db);color:white;font-weight:700;font-size:14px;cursor:pointer}
+    .primary{width:100%;margin-top:16px}.message{min-height:22px;color:var(--accent2);font-size:13px;line-height:1.5;margin:12px 0 0}.muted{color:var(--muted);font-size:12px;line-height:1.6}
+    .chat{height:260px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 16px}.bubble{max-width:85%;padding:12px 15px;border-radius:16px;line-height:1.5;font-size:14px;overflow-wrap:anywhere}.bot{background:#1a2944;border:1px solid #2a3c5e;align-self:flex-start}.user{background:#51458e;align-self:flex-end}
+    .compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:15px}.compose input{min-width:0;flex:1}.compose button{white-space:nowrap}
+    .hidden{display:none!important}.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.bar button{padding:9px 13px;background:#263654}.note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:16px auto 0;max-width:650px}
+    @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}}
   </style>
 </head>
 <body>
   <main class="wrap">
-    <header class="top"><div class="brand">✦ MY AI PARTNER</div><div class="status">● PRIVATE SPACE</div></header>
+    <header class="top"><div class="brand">✦ MY AI PARTNER</div><div class="status" id="status">● SECURE SIGN IN</div></header>
     <section class="hero">
       <div class="avatar" aria-label="Illustrated AI companion avatar" role="img"></div>
       <h1>Your AI Partner</h1>
-      <p class="sub">A private space to talk, reflect, learn, and work toward your goals — one conversation at a time.</p>
+      <p class="sub">የግል የAI ቦታህ፤ ለመወያየት፣ ለመማር እና ግቦችህን ለማሳካት።</p>
     </section>
-    <section class="panel" aria-label="Chat preview">
+
+    <section class="panel auth" id="authPanel">
+      <h2 id="authTitle">Welcome back 💜</h2>
+      <div class="tabs">
+        <button type="button" class="active" id="loginTab">Login</button>
+        <button type="button" id="signupTab">Create account</button>
+      </div>
+      <form id="authForm">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <label for="password">Password</label>
+        <input id="password" type="password" minlength="6" autocomplete="current-password" placeholder="At least 6 characters" required>
+        <button class="primary" id="authSubmit" type="submit">Login securely</button>
+      </form>
+      <p class="message" id="authMessage" role="status"></p>
+      <p class="muted">የግል መለያህን ተጠቅመህ ብቻ ግባ። Password በSupabase Auth ይተዳደራል።</p>
+    </section>
+
+    <section class="panel hidden" id="appPanel">
+      <div class="bar"><strong id="welcome">Hello 💜</strong><button type="button" id="logout">Logout</button></div>
       <div class="chat" id="chat" aria-live="polite">
-        <div class="bubble bot">Hello! 💜 I'm happy you're here. This is the first preview of your personal AI space. We'll connect the secure account, memory, and AI service next.</div>
+        <div class="bubble bot">ሰላም 💜 እንኳን ወደ የግል AI Partner ቦታህ በደህና መጣህ። አሁን የመለያ ግንኙነት ተዘጋጅቷል፤ ቀጣይ የAI አእምሮና Memory እንጨምራለን።</div>
       </div>
       <form class="compose" id="chatForm">
-        <input id="message" type="text" placeholder="Write a message..." autocomplete="off" aria-label="Write a message">
+        <input id="message" type="text" placeholder="መልዕክት ጻፍ..." autocomplete="off" aria-label="Write a message">
         <button type="submit">Send</button>
       </form>
-      <p class="note">Preview mode only. Messages are not sent to an AI service or saved yet. We'll enable private login and memory after configuring Supabase securely.</p>
+      <p class="note">ይህ ገና የChat UI ነው። መልዕክቶች ወደ AI አይላኩም እና አይቀመጡም፤ AI እና የግል Memory በሚቀጥለው ደረጃ ይገናኛሉ።</p>
     </section>
   </main>
-  <script>
-    const form=document.getElementById('chatForm');
-    const input=document.getElementById('message');
-    const chat=document.getElementById('chat');
-    form.addEventListener('submit',event=>{
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
+
+    const SUPABASE_URL = 'https://zgfcpwdgxdolgpgqyrrg.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ELbQNkYz1Ao4iSV0TW5IGQ_9JckylmF';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+    const $ = (id) => document.getElementById(id);
+    let mode = 'login';
+
+    function showMessage(message, isError = false) {
+      $('authMessage').textContent = message;
+      $('authMessage').style.color = isError ? '#ff9b9b' : 'var(--accent2)';
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const isLogin = mode === 'login';
+      $('loginTab').classList.toggle('active', isLogin);
+      $('signupTab').classList.toggle('active', !isLogin);
+      $('authTitle').textContent = isLogin ? 'Welcome back 💜' : 'Create your private account';
+      $('authSubmit').textContent = isLogin ? 'Login securely' : 'Create account';
+      $('password').autocomplete = isLogin ? 'current-password' : 'new-password';
+      showMessage('');
+    }
+
+    function showApp(user) {
+      $('authPanel').classList.add('hidden');
+      $('appPanel').classList.remove('hidden');
+      $('status').textContent = '● SIGNED IN';
+      $('welcome').textContent = 'Hello 💜 ' + (user.email || '');
+    }
+
+    function showAuth() {
+      $('appPanel').classList.add('hidden');
+      $('authPanel').classList.remove('hidden');
+      $('status').textContent = '● SECURE SIGN IN';
+    }
+
+    $('loginTab').addEventListener('click', () => setMode('login'));
+    $('signupTab').addEventListener('click', () => setMode('signup'));
+
+    $('authForm').addEventListener('submit', async (event) => {
       event.preventDefault();
-      const value=input.value.trim();
-      if(!value)return;
-      const bubble=document.createElement('div');
-      bubble.className='bubble user';
-      bubble.textContent=value;
-      chat.appendChild(bubble);
-      input.value='';
-      chat.scrollTop=chat.scrollHeight;
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      $('authSubmit').disabled = true;
+      $('authSubmit').textContent = 'Please wait...';
+      showMessage('');
+
+      try {
+        if (mode === 'signup') {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          if (data.session) {
+            showApp(data.user);
+          } else {
+            showMessage('መለያህ ተፈጥሯል። Email confirmation ከተጠየቀ በኢሜልህ የተላከውን ሊንክ ክፈት፣ ከዚያ Login አድርግ።');
+          }
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          showApp(data.user);
+        }
+      } catch (error) {
+        showMessage(error.message || 'Something went wrong. Please try again.', true);
+      } finally {
+        $('authSubmit').disabled = false;
+        $('authSubmit').textContent = mode === 'login' ? 'Login securely' : 'Create account';
+      }
+    });
+
+    $('logout').addEventListener('click', async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) showMessage(error.message, true);
+      showAuth();
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) showApp(session.user);
+      else showAuth();
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) showApp(session.user);
+
+    $('chatForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = $('message');
+      const value = input.value.trim();
+      if (!value) return;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble user';
+      bubble.textContent = value;
+      $('chat').appendChild(bubble);
+      input.value = '';
+      $('chat').scrollTop = $('chat').scrollHeight;
     });
   </script>
 </body>
