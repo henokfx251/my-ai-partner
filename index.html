@@ -21,7 +21,7 @@
     .chat{height:230px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 16px}.bubble{max-width:85%;padding:12px 15px;border-radius:16px;line-height:1.5;font-size:14px;overflow-wrap:anywhere;white-space:pre-wrap}.bot{background:#1a2944;border:1px solid #2a3c5e;align-self:flex-start}.user{background:#51458e;align-self:flex-end}
     .compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:15px}.compose input{min-width:0;flex:1}.compose button{white-space:nowrap}
     .hidden{display:none!important}.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.bar button,.secondary{padding:9px 13px;background:#263654}.note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:16px auto 0;max-width:650px}
-    .memory-item{border:1px solid #2a3c5e;background:#0c1527;border-radius:14px;padding:13px;margin-top:10px}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}.memory-tools{display:grid;grid-template-columns:1fr 155px;gap:8px;margin-top:12px}.memory-tools input,.memory-tools select{padding:11px;font-size:13px}.memory-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px}.memory-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.memory-tags span{font-size:11px;color:#c9c1ff;background:#282348;border:1px solid #51458e;padding:4px 8px;border-radius:20px}.memory-meta{font-size:11px;color:#7185a5;margin-top:8px}.empty-filter{padding:12px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:520px){.memory-tools{grid-template-columns:1fr}}
+    .chat-search{border:1px solid #2a3c5e;background:#0c1527;border-radius:13px;padding:12px;margin:12px 0}.chat-search-row{display:flex;gap:8px}.chat-search-row input{flex:1;min-width:0;padding:11px}.chat-search-meta{font-size:12px;color:var(--muted);margin:8px 0}.chat-search-results{display:grid;gap:8px;max-height:340px;overflow:auto}.chat-result{border:1px solid #2a3c5e;background:#111d32;border-radius:10px;padding:10px}.chat-result-head{display:flex;justify-content:space-between;gap:8px;color:var(--accent2);font-size:11px;margin-bottom:6px}.chat-result-text{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;color:#dce6f8}.chat-empty{font-size:13px;color:var(--muted);padding:10px 2px}@media(max-width:430px){.chat-search-row{flex-direction:column}}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}.memory-tools{display:grid;grid-template-columns:1fr 155px;gap:8px;margin-top:12px}.memory-tools input,.memory-tools select{padding:11px;font-size:13px}.memory-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px}.memory-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.memory-tags span{font-size:11px;color:#c9c1ff;background:#282348;border:1px solid #51458e;padding:4px 8px;border-radius:20px}.memory-meta{font-size:11px;color:#7185a5;margin-top:8px}.empty-filter{padding:12px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:520px){.memory-tools{grid-template-columns:1fr}}
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -66,6 +66,7 @@
       </section>
       <section class="panel">
         <div class="bar"><h2>💬 Chat History</h2><button type="button" class="secondary" id="clearChat">Clear history</button></div>
+        <div class="chat-search"><div class="chat-search-row"><input id="chatSearchInput" type="search" placeholder="Search your previous messages..." aria-label="Search chat history"><button type="button" class="secondary" id="chatSearchButton">Search</button></div><div class="chat-search-meta" id="chatSearchMeta">Search up to the latest 500 saved chat messages.</div><div class="chat-search-results" id="chatSearchResults" aria-live="polite"></div></div>
         <div class="chat" id="chat" aria-live="polite"><div class="bubble bot">ሰላም 💜 እኔ የግል AI Partner ነኝ። የምታስቀምጣቸውን Memory እጠቀማለሁ። እንዴት ልርዳህ?</div></div>
         <form class="compose" id="chatForm"><input id="message" type="text" placeholder="መልዕክት ጻፍ..." autocomplete="off" aria-label="Write a message"><button type="submit">Send</button></form>
         <p class="note">የቀድሞ ውይይቶችህ በግል መለያህ ይቀመጣሉ፤ AI ለቀጣይ ውይይት የቅርብ መልዕክቶችን ይጠቀማል።</p>
@@ -78,7 +79,7 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ELbQNkYz1Ao4iSV0TW5IGQ_9JckylmF';
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
-    let mode = 'login', editingId = null, currentUser = null, allMemories = [];
+    let mode = 'login', editingId = null, currentUser = null, allMemories = [], searchableChatRows = null;
 
     function showMessage(id, message, error=false) { $(id).textContent=message; $(id).style.color=error?'#ff9b9b':'var(--accent2)'; }
     function setMode(next) {
@@ -192,11 +193,40 @@
       else data.reverse().forEach(item=>addBubble(item.content,item.role));
       $('chat').scrollTop=$('chat').scrollHeight;
     }
+    async function searchChatHistory() {
+      if(!currentUser) return;
+      const query=$('chatSearchInput').value.trim().toLocaleLowerCase();
+      const results=$('chatSearchResults');
+      results.replaceChildren();
+      if(!query) { $('chatSearchMeta').textContent='Enter a word or phrase to search your saved conversations.'; return; }
+      $('chatSearchMeta').textContent='Searching saved conversations...';
+      if(!searchableChatRows) {
+        const {data,error}=await supabase.from('ai_chat_messages').select('id,role,content,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(500);
+        if(error) { $('chatSearchMeta').textContent='Search failed: '+error.message; return; }
+        searchableChatRows=data||[];
+      }
+      const matches=searchableChatRows.filter(item=>(item.content||'').toLocaleLowerCase().includes(query));
+      $('chatSearchMeta').textContent=matches.length+' match(es) in '+searchableChatRows.length+' latest saved messages. '+(searchableChatRows.length===500?'Older messages beyond the latest 500 are not included.':'');
+      if(!matches.length) { const empty=document.createElement('p');empty.className='chat-empty';empty.textContent='No matching messages found.';results.append(empty);return; }
+      matches.slice(0,50).forEach(item=>{
+        const card=document.createElement('article');card.className='chat-result';
+        const head=document.createElement('div');head.className='chat-result-head';
+        const who=document.createElement('strong');who.textContent=item.role==='user'?'You':'AI Partner';
+        const when=document.createElement('time');when.textContent=item.created_at?new Date(item.created_at).toLocaleString():'';
+        head.append(who,when);
+        const body=document.createElement('div');body.className='chat-result-text';body.textContent=item.content||'';
+        card.append(head,body);results.append(card);
+      });
+      if(matches.length>50){const more=document.createElement('p');more.className='chat-empty';more.textContent='Showing first 50 matches.';results.append(more);}
+    }
+    $('chatSearchButton').addEventListener('click',searchChatHistory);
+    $('chatSearchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchChatHistory();}});
+    $('chatSearchInput').addEventListener('input',()=>{if(!$('chatSearchInput').value.trim()){$('chatSearchResults').replaceChildren();$('chatSearchMeta').textContent='Search up to the latest 500 saved chat messages.';}});
     $('clearChat').addEventListener('click',async()=>{
       if(!currentUser || !confirm('ሁሉንም የChat ታሪክ ማጥፋት ትፈልጋለህ?')) return;
       const {error}=await supabase.from('ai_chat_messages').delete().eq('user_id',currentUser.id);
       if(error) addBubble('ታሪኩን ማጥፋት አልተቻለም። '+error.message);
-      else await loadChatHistory();
+      else { searchableChatRows=null; $('chatSearchResults').replaceChildren(); $('chatSearchMeta').textContent='Search up to the latest 500 saved chat messages.'; await loadChatHistory(); }
     });
     $('chatForm').addEventListener('submit',async e=>{
       e.preventDefault(); const input=$('message'), value=input.value.trim(); if(!value||!currentUser)return;
