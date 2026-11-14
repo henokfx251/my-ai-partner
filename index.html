@@ -120,6 +120,7 @@
             <img class="live-avatar-preview" id="liveAvatarPreview" alt="Selected LiveAvatar preview" hidden>
           </div>
           <div class="call-status" id="callStatus" role="status">ጥሪ ለመጀመር Start Call ተጫን።</div>
+          <div style="max-width:360px;margin:12px auto"><label for="callVoiceSelect">Amharic female voice</label><select id="callVoiceSelect"><option value="">Loading Amharic voices...</option></select></div>
           <div class="call-controls"><button type="button" id="startCall">Start Call</button><button type="button" class="secondary" id="callMic" disabled>🎙️ Speak</button><button type="button" class="end-call" id="endCall" disabled>End Call</button></div>
           <p class="muted" style="margin-top:10px">Microphone permission ሲጠየቅ ፍቀድ። Camera access አንጠይቅም። Voice recognition በBrowser ድጋፍ ላይ ይመረኮዛል።</p>
         </section>
@@ -421,8 +422,45 @@
     let callActive=false, mediaRecorder=null, callStream=null, recordedChunks=[], callBusy=false;
     function setCallStatus(message,error=false){$('callStatus').textContent=message;$('callStatus').style.color=error?'#ff9b9b':'var(--accent2)';}
     function syncCallAvatar(){const el=$('callAvatar');if(!el)return;if(!currentUser)return;try{const saved=localStorage.getItem(avatarStorageKey());if(saved){const parsed=JSON.parse(saved);if(parsed.image){el.style.backgroundImage='url('+JSON.stringify(parsed.image)+')';el.classList.add('photo');$('callAvatarName').textContent=parsed.name||'Your AI Partner';return;}}}catch(_){}el.style.backgroundImage='';el.classList.remove('photo');$('callAvatarName').textContent=$('avatarName')?.value||'Your AI Partner';}
-    function speakCallReply(text){if(!('speechSynthesis' in window)){setCallStatus('ይህ Browser የVoice output አይደግፍም።');return;}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);const lang=$('personalityLanguage')?.value||'auto';utterance.lang=lang==='am'?'am-ET':lang==='en'?'en-US':(/^[\u1200-\u137F]/.test(text)?'am-ET':'en-US');utterance.rate=.96;utterance.pitch=1.08;utterance.onstart=()=>$('callAvatar').classList.add('speaking');utterance.onend=()=>$('callAvatar').classList.remove('speaking');utterance.onerror=()=> $('callAvatar').classList.remove('speaking');window.speechSynthesis.speak(utterance);}
-    async function sendCallToAI(text){if(!currentUser||callBusy)return;callBusy=true;$('callMic').disabled=true;setCallStatus('AI Partner እያሰበች ነው...');try{const {data,error}=await supabase.functions.invoke('ai-chat',{body:{message:text}});if(error)throw error;if(data?.error)throw new Error(data.error);const reply=data?.reply||'ይቅርታ፣ ምላሽ ማግኘት አልቻልኩም።';addBubble(text,'user');addBubble(reply,'bot');setCallStatus('AI Partner እየመለሰች ነው...');speakCallReply(reply);}catch(err){setCallStatus('AI connection error: '+(err.message||'Try again.'),true);}finally{callBusy=false;$('callMic').disabled=!callActive;$('callMic').textContent='🎙️ Start speaking';}}
+    let amharicVoicesLoaded=false, callAudio=null, callVoiceOptions=[];
+    async function loadAmharicVoices(){
+      const select=$('callVoiceSelect');
+      select.innerHTML='<option value="">Loading Amharic female voices...</option>';
+      const {data,error}=await supabase.functions.invoke('ai-speak',{body:{action:'voices'}});
+      if(error)throw error;if(data?.error)throw new Error(data.error);
+      callVoiceOptions=data?.voices||[];
+      select.replaceChildren();
+      if(!callVoiceOptions.length){select.add(new Option('No Amharic female voice found',''));throw new Error('በElevenLabs Voice Library ውስጥ የአማርኛ ሴት ድምፅ አልተገኘም።');}
+      callVoiceOptions.forEach((voice,index)=>select.add(new Option(voice.name+(voice.accent?' · '+voice.accent:''),voice.id,index===0,index===0)));
+      amharicVoicesLoaded=true;
+    }
+    async function speakCallReply(text){
+      const isAmharic=/[\u1200-\u137F]/.test(text);
+      if(!isAmharic){
+        if(!('speechSynthesis' in window)){setCallStatus('Browser voice output is not supported.',true);return;}
+        window.speechSynthesis.cancel();
+        const utterance=new SpeechSynthesisUtterance(text);utterance.lang='en-US';utterance.rate=.96;utterance.pitch=1.08;
+        utterance.onstart=()=>$('callAvatar').classList.add('speaking');utterance.onend=()=>$('callAvatar').classList.remove('speaking');utterance.onerror=()=>$('callAvatar').classList.remove('speaking');window.speechSynthesis.speak(utterance);return;
+      }
+      try{
+        if(!amharicVoicesLoaded)await loadAmharicVoices();
+        const voiceId=$('callVoiceSelect').value;
+        if(!voiceId)throw new Error('የአማርኛ ሴት ድምፅ ምረጥ።');
+        if(callAudio){callAudio.pause();callAudio=null;}
+        setCallStatus('በጥራት ያለ የአማርኛ ድምፅ እያዘጋጀች ነው...');
+        const {data,error}=await supabase.functions.invoke('ai-speak',{body:{action:'speak',text,voiceId}});
+        if(error)throw error;if(data?.error)throw new Error(data.error);
+        const raw=atob(data.audio);const bytes=new Uint8Array(raw.length);
+        for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+        const blob=new Blob([bytes],{type:data.mimeType||'audio/mpeg'});
+        callAudio=new Audio(URL.createObjectURL(blob));
+        callAudio.onplay=()=>$('callAvatar').classList.add('speaking');
+        callAudio.onended=()=>{$('callAvatar').classList.remove('speaking');setCallStatus('ድምፅ ተጠናቋል።');};
+        callAudio.onerror=()=>{$('callAvatar').classList.remove('speaking');setCallStatus('የድምፅ ማጫወቻ ስህተት ተፈጥሯል።',true);};
+        await callAudio.play();
+      }catch(err){$('callAvatar').classList.remove('speaking');setCallStatus('Amharic voice error: '+(err.message||'Please try again.'),true);}
+    }
+    async function sendCallToAI(text){if(!currentUser||callBusy)return;callBusy=true;$('callMic').disabled=true;setCallStatus('AI Partner እያሰበች ነው...');try{const {data,error}=await supabase.functions.invoke('ai-chat',{body:{message:text}});if(error)throw error;if(data?.error)throw new Error(data.error);const reply=data?.reply||'ይቅርታ፣ ምላሽ ማግኘት አልቻልኩም።';addBubble(text,'user');addBubble(reply,'bot');setCallStatus('AI Partner እየመለሰች ነው...');await speakCallReply(reply);}catch(err){setCallStatus('AI connection error: '+(err.message||'Try again.'),true);}finally{callBusy=false;$('callMic').disabled=!callActive;$('callMic').textContent='🎙️ Start speaking';}}
     async function transcribeCallAudio(blob){
       if(!blob||!blob.size){setCallStatus('ድምፅ አልተቀረጸም። እንደገና ሞክር።',true);return;}
       setCallStatus('ድምፅህን ወደ ጽሑፍ እየቀየርኩ ነው...');
@@ -456,9 +494,9 @@
         setCallStatus('እየቀረጽኩ ነው... ተናገር፤ ሲጨርስ Stop & Send ተጫን።');
       }catch(err){callStream?.getTracks().forEach(track=>track.stop());callStream=null;setCallStatus('Microphone መክፈት አልተቻለም። Browser permission ፍቀድ። '+(err.message||''),true);}
     }
-    $('startCall').addEventListener('click',()=>{if(!currentUser)return;callActive=true;syncCallAvatar();$('startCall').disabled=true;$('endCall').disabled=false;$('callMic').disabled=false;setCallStatus('ጥሪው ተጀምሯል። Start speaking ተጫንና ተናገር።');});
+    $('startCall').addEventListener('click',async()=>{if(!currentUser)return;$('startCall').disabled=true;setCallStatus('የአማርኛ ሴት ድምፅ እየጫንኩ ነው...');try{await loadAmharicVoices();callActive=true;syncCallAvatar();$('endCall').disabled=false;$('callMic').disabled=false;setCallStatus('ጥሪው ተጀምሯል። Start speaking ተጫንና ተናገር።');}catch(err){$('startCall').disabled=false;setCallStatus(err.message||'Voice setup failed.',true);}});
     $('callMic').addEventListener('click',()=>{if(!callActive||callBusy)return;if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('callMic').disabled=true;setCallStatus('ድምፅህን እያዘጋጀሁ ነው...');}else{startVoiceRecording();}});
-    $('endCall').addEventListener('click',()=>{callActive=false;if(mediaRecorder?.state==='recording'){mediaRecorder.onstop=null;mediaRecorder.stop();}callStream?.getTracks().forEach(track=>track.stop());callStream=null;mediaRecorder=null;if('speechSynthesis' in window)window.speechSynthesis.cancel();$('callAvatar').classList.remove('speaking');$('startCall').disabled=false;$('callMic').disabled=true;$('callMic').textContent='🎙️ Start speaking';$('endCall').disabled=true;setCallStatus('ጥሪው ተጠናቋል።');});
+    $('endCall').addEventListener('click',()=>{callActive=false;if(mediaRecorder?.state==='recording'){mediaRecorder.onstop=null;mediaRecorder.stop();}callStream?.getTracks().forEach(track=>track.stop());callStream=null;mediaRecorder=null;if('speechSynthesis' in window)window.speechSynthesis.cancel();if(callAudio){callAudio.pause();callAudio=null;} $('callAvatar').classList.remove('speaking');$('startCall').disabled=false;$('callMic').disabled=true;$('callMic').textContent='🎙️ Start speaking';$('endCall').disabled=true;setCallStatus('ጥሪው ተጠናቋል።');});
     function setMode(next) {
       mode=next; const login=mode==='login';
       $('loginTab').classList.toggle('active',login); $('signupTab').classList.toggle('active',!login);
