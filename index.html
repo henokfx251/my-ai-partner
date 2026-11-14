@@ -22,6 +22,7 @@
     .compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:15px}.compose input{min-width:0;flex:1}.compose button{white-space:nowrap}
     .hidden{display:none!important}.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.bar button,.secondary{padding:9px 13px;background:#263654}.note{text-align:center;color:var(--muted);font-size:12px;line-height:1.6;margin:16px auto 0;max-width:650px}
     .chat-search{border:1px solid #2a3c5e;background:#0c1527;border-radius:13px;padding:12px;margin:12px 0}.chat-search-row{display:flex;gap:8px}.chat-search-row input{flex:1;min-width:0;padding:11px}.chat-search-meta{font-size:12px;color:var(--muted);margin:8px 0}.chat-search-results{display:grid;gap:8px;max-height:340px;overflow:auto}.chat-result{border:1px solid #2a3c5e;background:#111d32;border-radius:10px;padding:10px}.chat-result-head{display:flex;justify-content:space-between;gap:8px;color:var(--accent2);font-size:11px;margin-bottom:6px}.chat-result-text{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;color:#dce6f8}.chat-empty{font-size:13px;color:var(--muted);padding:10px 2px}@media(max-width:430px){.chat-search-row{flex-direction:column}}.memory-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.memory-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.memory-actions button{padding:8px 11px;font-size:12px}.danger{background:#713c54}.tag{color:var(--accent2);font-size:11px}.memory-tools{display:grid;grid-template-columns:1fr 155px;gap:8px;margin-top:12px}.memory-tools input,.memory-tools select{padding:11px;font-size:13px}.memory-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px}.memory-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.memory-tags span{font-size:11px;color:#c9c1ff;background:#282348;border:1px solid #51458e;padding:4px 8px;border-radius:20px}.memory-meta{font-size:11px;color:#7185a5;margin-top:8px}.empty-filter{padding:12px;text-align:center;color:var(--muted);font-size:13px}@media(max-width:520px){.memory-tools{grid-template-columns:1fr}}
+    .personality-card{border:1px solid #51458e;background:linear-gradient(145deg,#171f3b,#111a2e);border-radius:16px;padding:15px;margin:16px 0 22px}.personality-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.personality-grid label{margin-top:8px}.personality-grid select{padding:11px;font-size:13px}.personality-card h3{margin:0 0 5px}.personality-card .muted{margin:0 0 8px}.personality-save{width:100%;margin-top:12px}.personality-status{min-height:18px;margin-top:8px;color:var(--accent2);font-size:12px}@media(max-width:560px){.personality-grid{grid-template-columns:1fr}}
     @media(max-width:520px){.wrap{padding:18px 13px}.hero{padding-top:28px}.panel{padding:14px}.compose button{padding:0 14px}.memory-head{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -47,6 +48,17 @@
     <section class="hidden" id="appPanel">
       <section class="panel">
         <div class="bar"><strong id="welcome">Hello 💜</strong><button type="button" id="logout">Logout</button></div>
+        <section class="personality-card" aria-labelledby="personalityHeading">
+          <h3 id="personalityHeading">✨ AI Personality Settings</h3>
+          <p class="muted">የAI Partner አነጋገርን፣ ቋንቋን እና የመልስ ርዝመትን ምረጥ። ምርጫህ በግል መለያህ ይቀመጣል።</p>
+          <div class="personality-grid">
+            <div><label for="personalityStyle">Personality</label><select id="personalityStyle"><option value="caring">Warm & caring</option><option value="friendly">Friendly</option><option value="direct">Direct & practical</option><option value="professional">Professional</option><option value="playful">Playful</option></select></div>
+            <div><label for="personalityLanguage">Preferred language</label><select id="personalityLanguage"><option value="auto">Automatic</option><option value="am">Amharic</option><option value="en">English</option></select></div>
+            <div><label for="personalityLength">Response length</label><select id="personalityLength"><option value="concise">Short</option><option value="balanced">Balanced</option><option value="detailed">Detailed</option></select></div>
+          </div>
+          <button type="button" class="personality-save" id="savePersonality">Save personality settings</button>
+          <div class="personality-status" id="personalityStatus" role="status">Loading your preferences...</div>
+        </section>
         <h2>🧠 My Private Memory</h2>
         <p class="muted">እዚህ የምታስቀምጠውን መረጃ ብቻ እናስታውሳለን። ማንኛውንም መረጃ ማስተካከል ወይም ማጥፋት ትችላለህ።</p>
         <form id="memoryForm">
@@ -82,6 +94,37 @@
     let mode = 'login', editingId = null, currentUser = null, allMemories = [], searchableChatRows = null;
 
     function showMessage(id, message, error=false) { $(id).textContent=message; $(id).style.color=error?'#ff9b9b':'var(--accent2)'; }
+    const defaultPersonalitySettings={personality:'caring',language:'auto',response_length:'balanced'};
+    function setPersonalityStatus(message,error=false){$('personalityStatus').textContent=message;$('personalityStatus').style.color=error?'#ff9b9b':'var(--accent2)';}
+    async function loadPersonalitySettings(){
+      if(!currentUser)return;
+      setPersonalityStatus('Loading your preferences...');
+      try{
+        let {data,error}=await supabase.from('ai_personality_settings').select('personality,language,response_length').eq('user_id',currentUser.id).maybeSingle();
+        if(error)throw error;
+        if(!data){
+          const created=await supabase.from('ai_personality_settings').upsert({user_id:currentUser.id,...defaultPersonalitySettings},{onConflict:'user_id'}).select('personality,language,response_length').single();
+          if(created.error)throw created.error;
+          data=created.data;
+        }
+        $('personalityStyle').value=data.personality||defaultPersonalitySettings.personality;
+        $('personalityLanguage').value=data.language||defaultPersonalitySettings.language;
+        $('personalityLength').value=data.response_length||defaultPersonalitySettings.response_length;
+        setPersonalityStatus('Your preferences are loaded.');
+      }catch(err){setPersonalityStatus('Could not load settings: '+(err.message||'Unknown error'),true);}
+    }
+    $('savePersonality').addEventListener('click',async()=>{
+      if(!currentUser)return;
+      const button=$('savePersonality');button.disabled=true;setPersonalityStatus('Saving...');
+      try{
+        const payload={user_id:currentUser.id,personality:$('personalityStyle').value,language:$('personalityLanguage').value,response_length:$('personalityLength').value,updated_at:new Date().toISOString()};
+        const {error}=await supabase.from('ai_personality_settings').upsert(payload,{onConflict:'user_id'});
+        if(error)throw error;
+        setPersonalityStatus('Saved! Your next AI reply will use these preferences.');
+      }catch(err){setPersonalityStatus('Save failed: '+(err.message||'Unknown error'),true);}
+      finally{button.disabled=false;}
+    });
+
     function setMode(next) {
       mode=next; const login=mode==='login';
       $('loginTab').classList.toggle('active',login); $('signupTab').classList.toggle('active',!login);
@@ -92,7 +135,7 @@
     function showApp(user) {
       currentUser=user; $('authPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden');
       $('status').textContent='● SIGNED IN'; $('welcome').textContent='Hello 💜 '+(user.email||'');
-      loadMemories(); loadChatHistory();
+      loadPersonalitySettings(); loadMemories(); loadChatHistory();
     }
     function showAuth() {
       currentUser=null; $('appPanel').classList.add('hidden'); $('authPanel').classList.remove('hidden');
