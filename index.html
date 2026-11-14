@@ -227,7 +227,7 @@
     function showApp(user) {
       currentUser=user; $('authPanel').classList.add('hidden'); $('appPanel').classList.remove('hidden');
       $('status').textContent='● SIGNED IN'; $('welcome').textContent='Hello 💜 '+(user.email||'');
-      loadPersonalitySettings(); loadMemories(); loadChatHistory();
+      loadPersonalitySettings(); loadDailyCheckin(); loadMemories(); loadChatHistory();
     }
     function showAuth() {
       currentUser=null; $('appPanel').classList.add('hidden'); $('authPanel').classList.remove('hidden');
